@@ -120,16 +120,6 @@ const cards = {
   37: { text: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.", effect: () => { playerPosition = Math.min(50, playerPosition + 4); } },
   42: { text: "Strain Theory: Found scholarship. Move ahead 3.", effect: () => { playerPosition = Math.min(50, playerPosition + 3); } },
   48: { text: "Labeling Theory: Falsely accused. Move back 3.", effect: () => { playerPosition = Math.max(1, playerPosition - 3); } }
-} },
-  10: { text: "Labeling Theory: Labeled a troublemaker. Go back 3 spaces.", effect: () => { playerPosition = Math.max(1, playerPosition - 3); } },
-  15: { text: "Social Learning: Positive mentor. Move ahead 2 spaces.", effect: () => { playerPosition = Math.min(50, playerPosition + 2); } },
-  19: { text: "Conflict Theory: Racial profiling. Return to space 10.", effect: () => { playerPosition = 10; } },
-  23: { text: "Labeling Theory: Community service. Skip a turn but remove label.", effect: () => {} },
-  28: { text: "Strain Theory: Family crisis. Move back 2.", effect: () => { playerPosition = Math.max(1, playerPosition - 2); } },
-  33: { text: "Social Learning: Surrounded by crime. Draw again next turn.", effect: () => {} },
-  37: { text: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.", effect: () => { playerPosition = Math.min(50, playerPosition + 4); } },
-  42: { text: "Strain Theory: Found scholarship. Move ahead 3.", effect: () => { playerPosition = Math.min(50, playerPosition + 3); } },
-  48: { text: "Labeling Theory: Falsely accused. Lose 2 turns.", effect: () => {} }
 };
 
 for (let i = 1; i <= 50; i++) {
