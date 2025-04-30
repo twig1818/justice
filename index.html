@@ -102,7 +102,98 @@
 
   <!-- JavaScript remains unchanged -->
   <script>
-    // ... JS code stays the same
+    const board = document.getElementById('board');
+const positionDisplay = document.getElementById('position');
+const card = document.getElementById('card');
+let playerPosition = 1;
+
+const ladders = { 4: 18, 11: 26, 29: 39 };
+const chutes = { 22: 11, 36: 17, 45: 31 };
+const cards = {
+  6: { text: "Strain Theory: Missed rent payment. Move back 1 space.", effect: () => { playerPosition = Math.max(1, playerPosition - 1); } },
+  10: { text: "Labeling Theory: Labeled a troublemaker. Go back 3 spaces.", effect: () => { playerPosition = Math.max(1, playerPosition - 3); } },
+  15: { text: "Social Learning: Positive mentor. Move ahead 2 spaces.", effect: () => { playerPosition = Math.min(50, playerPosition + 2); } },
+  19: { text: "Conflict Theory: Racial profiling. Return to space 10.", effect: () => { playerPosition = 10; } },
+  23: { text: "Labeling Theory: Community service. Move ahead 1 space.", effect: () => { playerPosition = Math.min(50, playerPosition + 1); } },
+  28: { text: "Strain Theory: Family crisis. Move back 2.", effect: () => { playerPosition = Math.max(1, playerPosition - 2); } },
+  33: { text: "Social Learning: Surrounded by crime. Move back 1.", effect: () => { playerPosition = Math.max(1, playerPosition - 1); } },
+  37: { text: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.", effect: () => { playerPosition = Math.min(50, playerPosition + 4); } },
+  42: { text: "Strain Theory: Found scholarship. Move ahead 3.", effect: () => { playerPosition = Math.min(50, playerPosition + 3); } },
+  48: { text: "Labeling Theory: Falsely accused. Move back 3.", effect: () => { playerPosition = Math.max(1, playerPosition - 3); } }
+} },
+  10: { text: "Labeling Theory: Labeled a troublemaker. Go back 3 spaces.", effect: () => { playerPosition = Math.max(1, playerPosition - 3); } },
+  15: { text: "Social Learning: Positive mentor. Move ahead 2 spaces.", effect: () => { playerPosition = Math.min(50, playerPosition + 2); } },
+  19: { text: "Conflict Theory: Racial profiling. Return to space 10.", effect: () => { playerPosition = 10; } },
+  23: { text: "Labeling Theory: Community service. Skip a turn but remove label.", effect: () => {} },
+  28: { text: "Strain Theory: Family crisis. Move back 2.", effect: () => { playerPosition = Math.max(1, playerPosition - 2); } },
+  33: { text: "Social Learning: Surrounded by crime. Draw again next turn.", effect: () => {} },
+  37: { text: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.", effect: () => { playerPosition = Math.min(50, playerPosition + 4); } },
+  42: { text: "Strain Theory: Found scholarship. Move ahead 3.", effect: () => { playerPosition = Math.min(50, playerPosition + 3); } },
+  48: { text: "Labeling Theory: Falsely accused. Lose 2 turns.", effect: () => {} }
+};
+
+for (let i = 1; i <= 50; i++) {
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  cell.id = 'cell-' + i;
+  if (i === 1) {
+    cell.classList.add('start');
+    cell.innerHTML = `<div>1<br>Start Your Future</div>`;
+  } else if (i === 50) {
+    cell.classList.add('end');
+    cell.innerHTML = `<div>50<br>You Made the Right Choices</div>`;
+  } else {
+    cell.innerHTML = `<div>${i}</div>`;
+  }
+  if (ladders[i]) cell.classList.add('ladder');
+  if (chutes[i]) cell.classList.add('chute');
+  if (cards[i]) {
+    cell.classList.add('draw-card');
+    cell.onclick = () => {
+      const cardData = cards[i];
+      card.textContent = cardData.text;
+      card.style.display = 'block';
+    };
+  }
+  board.appendChild(cell);
+}
+
+function renderPlayer() {
+  document.querySelectorAll('.player').forEach(p => p.remove());
+  const currentCell = document.getElementById('cell-' + playerPosition);
+  const token = document.createElement('div');
+  token.className = 'player';
+  currentCell.appendChild(token);
+}
+
+function rollDice() {
+  card.style.display = 'none';
+  const roll = Math.floor(Math.random() * 6) + 1;
+  let nextPos = playerPosition + roll;
+  if (nextPos > 50) nextPos = 50;
+
+  if (ladders[nextPos]) {
+    nextPos = ladders[nextPos];
+    alert('🟢 You climbed a ladder!');
+  } else if (chutes[nextPos]) {
+    nextPos = chutes[nextPos];
+    alert('🔴 You slid down a chute!');
+  }
+
+  playerPosition = nextPos;
+
+  if (cards[playerPosition]) {
+    const cardData = cards[playerPosition];
+    cardData.effect();
+    card.textContent = cardData.text;
+    card.style.display = 'block';
+  }
+
+  positionDisplay.textContent = playerPosition;
+  renderPlayer();
+}
+
+renderPlayer();
   </script>
 </body>
 </html>
