@@ -10,6 +10,10 @@
       text-align: center;
       background-color: #f4f4f4;
     }
+    h1 {
+      font-size: 28px;
+      margin-top: 20px;
+    }
     #board {
       display: grid;
       grid-template-columns: repeat(10, 90px);
@@ -78,32 +82,104 @@
       margin-top: 10px;
       font-size: 16px;
     }
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+    .info-tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    .info-button {
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+    .tooltip-content {
+      visibility: hidden;
+      width: 220px;
+      background-color: #333;
+      color: #fff;
+      text-align: left;
+      padding: 8px;
+      border-radius: 6px;
+      position: absolute;
+      z-index: 1;
+      top: 125%;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 12px;
+    }
+    .info-tooltip:hover .tooltip-content {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
   <h1>Paths of Justice</h1>
   <div style="display: flex; justify-content: center; align-items: flex-start; gap: 40px;">
-  <div id="playerSelection" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
-    <h3>Players</h3>
-    <button onclick="joinGame(0)" style="background-color: gold;">Join as Player 1 🟡</button>
-    <button onclick="joinGame(1)" style="background-color: red; color: white;">Join as Player 2 🔴</button>
-    <button onclick="joinGame(2)" style="background-color: blue; color: white;">Join as Player 3 🔵</button>
-    <button onclick="joinGame(3)" style="background-color: green; color: white;">Join as Player 4 🟢</button>
-    <button onclick="resetGame()">Start Over</button>
-  </div>
-  <div>
-    <div id="board"></div>
-    
+    <div id="playerSelection" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
+      <h3>Players</h3>
+
+      <div class="player-row">
+        <button onclick="joinGame(0)" style="background-color: gold;">Join as Jaylen 🟡</button>
+        <div class="info-tooltip">
+          <button class="info-button">ℹ️</button>
+          <div class="tooltip-content">
+            Jaylen – Low-income background. Faces pressure to hustle. Influenced by media and limited options. (Strain Theory)
+          </div>
+        </div>
+      </div>
+
+      <div class="player-row">
+        <button onclick="joinGame(1)" style="background-color: red; color: white;">Join as Samantha 🔴</button>
+        <div class="info-tooltip">
+          <button class="info-button">ℹ️</button>
+          <div class="tooltip-content">
+            Samantha – Middle-class teen labeled early. Risks self-fulfilling prophecy. (Labeling Theory)
+          </div>
+        </div>
+      </div>
+
+      <div class="player-row">
+        <button onclick="joinGame(2)" style="background-color: blue; color: white;">Join as Marcus 🔵</button>
+        <div class="info-tooltip">
+          <button class="info-button">ℹ️</button>
+          <div class="tooltip-content">
+            Marcus – Surrounded by crime and peers. Learns behavior from others. (Social Learning Theory)
+          </div>
+        </div>
+      </div>
+
+      <div class="player-row">
+        <button onclick="joinGame(3)" style="background-color: green; color: white;">Join as Elena 🟢</button>
+        <div class="info-tooltip">
+          <button class="info-button">ℹ️</button>
+          <div class="tooltip-content">
+            Elena – Activist who sees justice through race and class inequality. (Conflict Theory)
+          </div>
+        </div>
+      </div>
+
+      <button onclick="resetGame()">Start Over</button>
+    </div>
+    <div>
+      <div id="board"></div>
     </div>
   </div>
   <div style="margin-top: 20px;">
-      <p>Player position: <span id="position">1</span></p>
-      <p id="turnDisplay">🎯 Player 1's turn</p>
-      <p id="diceResult"></p>
-      <button onclick="rollDice()">Roll Dice</button>
-      <button onclick="movePlayer()">Move Player</button>
-      <div class="card" id="card" style="display:none;"></div>
-    </div>
+    <p>Player position: <span id="position">1</span></p>
+    <p id="turnDisplay">🎯 Player 1's turn</p>
+    <p id="diceResult"></p>
+    <button onclick="rollDice()">Roll Dice</button>
+    <button onclick="movePlayer()">Move Player</button>
+    <div class="card" id="card" style="display:none;"></div>
+  </div>
 
   <script>
     window.onload = function () {
@@ -255,6 +331,4 @@
     }
   </script>
 </body>
-</html> 
-
-
+</html>
