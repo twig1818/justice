@@ -12,7 +12,7 @@
     }
     #board {
       display: grid;
-      grid-template-columns: repeat(5, 50px);
+      grid-template-columns: repeat(10, 50px);
       grid-template-rows: repeat(5, 50px);
       gap: 2px;
       margin: 20px auto;
@@ -40,33 +40,43 @@
     .ladder {
       background-color: #d4fdd4 !important;
     }
+    .ladder::after {
+      content: "🟢 Good Choice! Move Up";
+      position: absolute;
+      font-size: 8px;
+      bottom: 2px;
+      left: 2px;
+      color: green;
+    }
     .chute {
       background-color: #fdd4d4 !important;
     }
+    .chute::after {
+      content: "🔴 Bad Choice! Move Down";
+      position: absolute;
+      font-size: 8px;
+      bottom: 2px;
+      left: 2px;
+      color: red;
+    }
     .draw-card {
       background-color: #d4e3fd !important;
-    }
-    .ladder::after {
-      content: "🟢";
-      position: absolute;
-      font-size: 18px;
-      top: 2px;
-      right: 2px;
-    }
-    .chute::after {
-      content: "🔴";
-      position: absolute;
-      font-size: 18px;
-      top: 2px;
-      right: 2px;
     }
     .draw-card::after {
       content: "📜 Draw Card";
       font-size: 8px;
       position: absolute;
-      bottom: 2px;
+      top: 2px;
       left: 2px;
       color: blue;
+    }
+    .start {
+      background-color: #a8e6ff !important;
+      font-weight: bold;
+    }
+    .end {
+      background-color: #b9fbc0 !important;
+      font-weight: bold;
     }
     .card {
       margin: 20px auto;
@@ -94,20 +104,34 @@
     const card = document.getElementById('card');
     let playerPosition = 1;
 
-    const ladders = { 4: 12, 9: 20 };
-    const chutes = { 22: 11, 18: 6 };
+    const ladders = { 4: 18, 11: 26, 29: 39 };
+    const chutes = { 22: 11, 36: 17, 45: 31 };
     const cards = {
-      6: "Strain Theory: You lost your job. A) Look for help (skip turn). B) Steal (move forward 2, then back 4).",
-      10: "Labeling Theory: Arrested wrongly. A) Accept plea (back 2). B) Fight it (skip turn).",
-      15: "Conflict Theory: Stopped unfairly. A) Stay calm (skip turn). B) Resist (go back 3).",
-      21: "Social Learning: Friends skip school. A) Join (forward 2, back 5). B) Avoid (forward 3)."
+      6: "Strain Theory: Missed rent payment. Lose a turn.",
+      10: "Labeling Theory: Labeled a troublemaker. Go back 3 spaces.",
+      15: "Social Learning: Positive mentor. Move ahead 2 spaces.",
+      19: "Conflict Theory: Racial profiling. Return to space 10.",
+      23: "Labeling Theory: Community service. Skip a turn but remove label.",
+      28: "Strain Theory: Family crisis. Move back 2.",
+      33: "Social Learning: Surrounded by crime. Draw again next turn.",
+      37: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.",
+      42: "Strain Theory: Found scholarship. Move ahead 3.",
+      48: "Labeling Theory: Falsely accused. Lose 2 turns."
     };
 
-    for (let i = 1; i <= 25; i++) {
+    for (let i = 1; i <= 50; i++) {
       const cell = document.createElement('div');
       cell.className = 'cell';
       cell.id = 'cell-' + i;
-      cell.innerHTML = `<div>${i}</div>`;
+      if (i === 1) {
+        cell.classList.add('start');
+        cell.innerHTML = `<div>1<br>Start Your Future</div>`;
+      } else if (i === 50) {
+        cell.classList.add('end');
+        cell.innerHTML = `<div>50<br>You Made the Right Choices</div>`;
+      } else {
+        cell.innerHTML = `<div>${i}</div>`;
+      }
       if (ladders[i]) cell.classList.add('ladder');
       if (chutes[i]) cell.classList.add('chute');
       if (cards[i]) cell.classList.add('draw-card');
@@ -126,7 +150,7 @@
       card.style.display = 'none';
       const roll = Math.floor(Math.random() * 6) + 1;
       let nextPos = playerPosition + roll;
-      if (nextPos > 25) nextPos = 25;
+      if (nextPos > 50) nextPos = 50;
 
       if (ladders[nextPos]) {
         nextPos = ladders[nextPos];
