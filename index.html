@@ -223,12 +223,19 @@
         if (ladders[i]) cell.classList.add('ladder');
         if (chutes[i]) cell.classList.add('chute');
         if (cards[i]) {
-          cell.classList.add('draw-card');
-          cell.onclick = () => {
-            const cardData = cards[i];
-            card.textContent = cardData.text;
-            card.style.display = 'block';
-          };
+  cell.classList.add('draw-card');
+  const tooltip = document.createElement('div');
+  tooltip.className = 'info-tooltip';
+  const button = document.createElement('button');
+  button.className = 'info-button';
+  button.textContent = 'ℹ️';
+  const tooltipText = document.createElement('div');
+  tooltipText.className = 'tooltip-content';
+  tooltipText.textContent = cards[i].text;
+  tooltip.appendChild(button);
+  tooltip.appendChild(tooltipText);
+  cell.appendChild(tooltip);
+};
         }
         board.appendChild(cell);
       }
