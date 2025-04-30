@@ -181,7 +181,7 @@ let pendingRoll = null;
       };
       };
 
-      window.joinGame = function (playerIndex) {
+      function joinGame(playerIndex) {
         if (activePlayers[playerIndex]) {
           alert('Player ' + (playerIndex + 1) + ' has already joined.');
           return;
@@ -189,59 +189,63 @@ let pendingRoll = null;
         activePlayers[playerIndex] = true;
         alert('Player ' + (playerIndex + 1) + ' joined the game!');
         renderPlayer();
-      };
+      }
+function movePlayer() {
+        if (pendingRoll === null) {
+          alert('Please roll the dice first!');
+          return;
+        }
 
-      window.movePlayer = function () {
-  if (pendingRoll === null) {
-    alert('Please roll the dice first!');
-    return;
-  }
+        let currentPos = playerPositions[currentPlayer];
+        let nextPos = currentPos + pendingRoll;
+        if (nextPos > 50) nextPos = 50;
 
-  let currentPos = playerPositions[currentPlayer];
-  let nextPos = currentPos + pendingRoll;
-  if (nextPos > 50) nextPos = 50;
+        if (ladders[nextPos]) {
+          nextPos = ladders[nextPos];
+          alert('🟢 You climbed a ladder!');
+        } else if (chutes[nextPos]) {
+          nextPos = chutes[nextPos];
+          alert('🔴 You slid down a chute!');
+        }
 
-  if (ladders[nextPos]) {
-    nextPos = ladders[nextPos];
-    alert('🟢 You climbed a ladder!');
-  } else if (chutes[nextPos]) {
-    nextPos = chutes[nextPos];
-    alert('🔴 You slid down a chute!');
-  }
+        playerPositions[currentPlayer] = nextPos;
 
-  playerPositions[currentPlayer] = nextPos;
+        if (cards[nextPos]) {
+          const cardData = cards[nextPos];
+          cardData.effect = cardData.effect.bind({ playerIndex: currentPlayer });
+          cardData.effect();
+          card.textContent = cardData.text;
+          card.style.display = 'block';
+        }
 
-  if (cards[nextPos]) {
-    const cardData = cards[nextPos];
-    cardData.effect = cardData.effect.bind({ playerIndex: currentPlayer });
-    cardData.effect();
-    card.textContent = cardData.text;
-    card.style.display = 'block';
-  }
+        positionDisplay.textContent = playerPositions[currentPlayer];
+        renderPlayer();
 
-  positionDisplay.textContent = playerPositions[currentPlayer];
-  renderPlayer();
+        pendingRoll = null;
 
-  pendingRoll = null;
+        do {
+          currentPlayer = (currentPlayer + 1) % 4;
+        } while (!activePlayers[currentPlayer]);
 
-  do {
-    currentPlayer = (currentPlayer + 1) % 4;
-  } while (!activePlayers[currentPlayer]);
+        document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
+      }
 
-  document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
-};
-
-window.resetGame = function () {
+function resetGame() {
         playerPositions = [1, 1, 1, 1];
         currentPlayer = 0;
         activePlayers = [false, false, false, false];
         renderPlayer();
         positionDisplay.textContent = 1;
         card.style.display = 'none';
-      };
+        document.getElementById('diceResult').textContent = '';
+        document.getElementById('turnDisplay').textContent = '🎯 Player 1\'s turn';
+      }
 
       renderPlayer();
     };
+  window.joinGame = joinGame;
+    window.movePlayer = movePlayer;
+    window.resetGame = resetGame;
   </script>
 </body>
 </html>
