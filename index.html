@@ -29,6 +29,7 @@
       font-size: 10px;
       position: relative;
       flex-direction: column;
+      cursor: pointer;
     }
     .player {
       background-color: gold;
@@ -134,7 +135,14 @@
       }
       if (ladders[i]) cell.classList.add('ladder');
       if (chutes[i]) cell.classList.add('chute');
-      if (cards[i]) cell.classList.add('draw-card');
+      if (cards[i]) {
+        cell.classList.add('draw-card');
+        cell.onclick = () => {
+          const cardData = cards[i];
+          card.textContent = cardData.text;
+          card.style.display = 'block';
+        };
+      }
       board.appendChild(cell);
     }
 
@@ -165,14 +173,12 @@
       if (cards[playerPosition]) {
         const cardData = cards[playerPosition];
         cardData.effect();
-        positionDisplay.textContent = playerPosition;
-        renderPlayer();
         card.textContent = cardData.text;
         card.style.display = 'block';
-      } else {
-        positionDisplay.textContent = playerPosition;
-        renderPlayer();
       }
+
+      positionDisplay.textContent = playerPosition;
+      renderPlayer();
     }
 
     renderPlayer();
