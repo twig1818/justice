@@ -92,8 +92,15 @@
     <button onclick="resetGame()">Start Over</button>
   </div>
   <div>
-    <div id="board"></div>
-    
+    $1
+    <div style="margin-top: 20px;">
+      <p>Player position: <span id="position">1</span></p>
+      <p id="turnDisplay">🎯 Player 1's turn</p>
+      <p id="diceResult"></p>
+      <button onclick="rollDice()">Roll Dice</button>
+      <button onclick="movePlayer()">Move Player</button>
+      <div class="card" id="card" style="display:none;"></div>
+    </div>
   </div>
   <p>Player position: <span id="position">1</span></p>
   <p id="turnDisplay">🎯 Player 1's turn</p>
