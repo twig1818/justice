@@ -12,29 +12,29 @@
     }
     #board {
       display: grid;
-      grid-template-columns: repeat(7, 50px);
-      grid-template-rows: repeat(8, 50px);
-      gap: 2px;
-      margin: 10px auto;
+      grid-template-columns: repeat(10, 90px);
+      grid-template-rows: repeat(5, 90px);
+      gap: 4px;
+      margin: 20px auto;
       width: max-content;
     }
     .cell {
       background-color: lightgray;
       border: 1px solid #999;
-      width: 50px;
-      height: 50px;
+      width: 90px;
+      height: 90px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 10px;
+      font-size: 12px;
       position: relative;
       flex-direction: column;
       cursor: pointer;
     }
     .player {
       border-radius: 50%;
-      width: 12px;
-      height: 12px;
+      width: 20px;
+      height: 20px;
       position: absolute;
     }
     .ladder { background-color: #d4fdd4 !important; }
@@ -81,7 +81,7 @@
   </style>
 </head>
 <body>
-  <h1 style="font-size: 24px;">Paths of Justice</h1>
+  <h1>Paths of Justice</h1>
   <div style="display: flex; justify-content: center; align-items: flex-start; gap: 40px;">
   <div id="playerSelection" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
     <h3>Players</h3>
@@ -93,17 +93,17 @@
   </div>
   <div>
     <div id="board"></div>
-      <div style="margin-top: 10px;">
-        <p>Player position: <span id="position">1</span></p>
-        <p id="turnDisplay">🎯 Player 1's turn</p>
-        <p id="diceResult"></p>
-        <button onclick="rollDice()">Roll Dice</button>
-        <button onclick="movePlayer()">Move Player</button>
-        <div class="card" id="card" style="display:none;"></div>
-      </div>
+    
     </div>
   </div>
-  
+  <div style="margin-top: 20px;">
+      <p>Player position: <span id="position">1</span></p>
+      <p id="turnDisplay">🎯 Player 1's turn</p>
+      <p id="diceResult"></p>
+      <button onclick="rollDice()">Roll Dice</button>
+      <button onclick="movePlayer()">Move Player</button>
+      <div class="card" id="card" style="display:none;"></div>
+    </div>
 
   <script>
     window.onload = function () {
@@ -132,43 +132,30 @@
         48: { text: "Labeling Theory: Falsely accused. Move back 3.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } }
       };
 
-      let rowCount = 8;
-let colCount = 7;
-for (let i = 0; i < rowCount * colCount; i++) {
-  const row = Math.floor(i / colCount);
-  const col = i % colCount;
-  const reverse = row % 2 !== 0;
-  const indexInRow = reverse ? (colCount - 1 - col) : col;
-  const cellNumber = row * colCount + indexInRow + 1;
-
-  if (cellNumber > 50) continue;
-
-  const cell = document.createElement('div');
-  cell.className = 'cell';
-  cell.id = 'cell-' + cellNumber;
-
-  if (cellNumber === 1) {
-    cell.classList.add('start');
-    cell.innerHTML = `<div>${cellNumber}<br>Start Your Future</div>`;
-  } else if (cellNumber === 50) {
-    cell.classList.add('end');
-    cell.innerHTML = `<div>${cellNumber}<br>You Made the Right Choices</div>`;
-  } else {
-    cell.innerHTML = `<div>${cellNumber}</div>`;
-  }
-  if (ladders[cellNumber]) cell.classList.add('ladder');
-  if (chutes[cellNumber]) cell.classList.add('chute');
-  if (cards[cellNumber]) {
-    cell.classList.add('draw-card');
-    cell.onclick = () => {
-      const cardData = cards[cellNumber];
-      card.textContent = cardData.text;
-      card.style.display = 'block';
-    };
-  }
-  board.appendChild(cell);
-}
-}
+      for (let i = 1; i <= 50; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.id = 'cell-' + i;
+        if (i === 1) {
+          cell.classList.add('start');
+          cell.innerHTML = `<div>1<br>Start Your Future</div>`;
+        } else if (i === 50) {
+          cell.classList.add('end');
+          cell.innerHTML = `<div>50<br>You Made the Right Choices</div>`;
+        } else {
+          cell.innerHTML = `<div>${i}</div>`;
+        }
+        if (ladders[i]) cell.classList.add('ladder');
+        if (chutes[i]) cell.classList.add('chute');
+        if (cards[i]) {
+          cell.classList.add('draw-card');
+          cell.onclick = () => {
+            const cardData = cards[i];
+            card.textContent = cardData.text;
+            card.style.display = 'block';
+          };
+        }
+        board.appendChild(cell);
       }
 
       function renderPlayer() {
@@ -269,3 +256,5 @@ for (let i = 0; i < rowCount * colCount; i++) {
   </script>
 </body>
 </html> 
+
+
