@@ -157,7 +157,7 @@ function renderPlayer() {
   currentCell.appendChild(token);
 }
 
-function rollDice() {
+window.rollDice = function() {
   card.style.display = 'none';
   const roll = Math.floor(Math.random() * 6) + 1;
   let nextPos = playerPosition + roll;
