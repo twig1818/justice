@@ -107,16 +107,16 @@
     const ladders = { 4: 18, 11: 26, 29: 39 };
     const chutes = { 22: 11, 36: 17, 45: 31 };
     const cards = {
-      6: "Strain Theory: Missed rent payment. Lose a turn.",
-      10: "Labeling Theory: Labeled a troublemaker. Go back 3 spaces.",
-      15: "Social Learning: Positive mentor. Move ahead 2 spaces.",
-      19: "Conflict Theory: Racial profiling. Return to space 10.",
-      23: "Labeling Theory: Community service. Skip a turn but remove label.",
-      28: "Strain Theory: Family crisis. Move back 2.",
-      33: "Social Learning: Surrounded by crime. Draw again next turn.",
-      37: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.",
-      42: "Strain Theory: Found scholarship. Move ahead 3.",
-      48: "Labeling Theory: Falsely accused. Lose 2 turns."
+      6: { text: "Strain Theory: Missed rent payment. Lose a turn.", effect: () => {} },
+      10: { text: "Labeling Theory: Labeled a troublemaker. Go back 3 spaces.", effect: () => { playerPosition = Math.max(1, playerPosition - 3); } },
+      15: { text: "Social Learning: Positive mentor. Move ahead 2 spaces.", effect: () => { playerPosition = Math.min(50, playerPosition + 2); } },
+      19: { text: "Conflict Theory: Racial profiling. Return to space 10.", effect: () => { playerPosition = 10; } },
+      23: { text: "Labeling Theory: Community service. Skip a turn but remove label.", effect: () => {} },
+      28: { text: "Strain Theory: Family crisis. Move back 2.", effect: () => { playerPosition = Math.max(1, playerPosition - 2); } },
+      33: { text: "Social Learning: Surrounded by crime. Draw again next turn.", effect: () => {} },
+      37: { text: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.", effect: () => { playerPosition = Math.min(50, playerPosition + 4); } },
+      42: { text: "Strain Theory: Found scholarship. Move ahead 3.", effect: () => { playerPosition = Math.min(50, playerPosition + 3); } },
+      48: { text: "Labeling Theory: Falsely accused. Lose 2 turns.", effect: () => {} }
     };
 
     for (let i = 1; i <= 50; i++) {
@@ -161,12 +161,17 @@
       }
 
       playerPosition = nextPos;
-      positionDisplay.textContent = playerPosition;
-      renderPlayer();
 
       if (cards[playerPosition]) {
-        card.textContent = cards[playerPosition];
+        const cardData = cards[playerPosition];
+        cardData.effect();
+        positionDisplay.textContent = playerPosition;
+        renderPlayer();
+        card.textContent = cardData.text;
         card.style.display = 'block';
+      } else {
+        positionDisplay.textContent = playerPosition;
+        renderPlayer();
       }
     }
 
