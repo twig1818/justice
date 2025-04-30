@@ -91,7 +91,9 @@
   </div>
   <div id="board"></div>
   <p>Player position: <span id="position">1</span></p>
-  <button onclick="rollDice()">Roll Dice</button>
+  <p id="turnDisplay"></p>
+$1
+$1
   <div class="card" id="card" style="display:none;"></div>
 
   <script>
@@ -173,6 +175,7 @@
         }
 
         const roll = Math.floor(Math.random() * 6) + 1;
+document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
         let currentPos = playerPositions[currentPlayer];
         let nextPos = currentPos + roll;
         if (nextPos > 50) nextPos = 50;
@@ -197,6 +200,7 @@
 
         positionDisplay.textContent = playerPositions[currentPlayer];
         renderPlayer();
+document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
 
         do {
           currentPlayer = (currentPlayer + 1) % 4;
