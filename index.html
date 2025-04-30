@@ -59,14 +59,33 @@
       left: 2px;
       color: red;
     }
-    .draw-card { background-color: #d4e3fd !important; }
-    .draw-card::after {
-      content: "📜 Draw Card";
-      font-size: 10px;
+    .draw-card { background-color: #d4e3fd !important; position: relative; }
+    .draw-card .info-button {
+      margin-top: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .tooltip-content {
+      visibility: hidden;
+      background-color: #333;
+      color: #fff;
+      text-align: left;
+      padding: 8px;
+      border-radius: 6px;
       position: absolute;
-      top: 2px;
-      left: 2px;
-      color: blue;
+      z-index: 1;
+      top: 100%;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 12px;
+      width: 200px;
+    }
+    .info-tooltip:hover .tooltip-content {
+      visibility: visible;
+      opacity: 1;
     }
     .start { background-color: #a8e6ff !important; font-weight: bold; }
     .end { background-color: #b9fbc0 !important; font-weight: bold; }
@@ -98,26 +117,6 @@
       border: none;
       background: none;
     }
-    .tooltip-content {
-      visibility: hidden;
-      width: 220px;
-      background-color: #333;
-      color: #fff;
-      text-align: left;
-      padding: 8px;
-      border-radius: 6px;
-      position: absolute;
-      z-index: 1;
-      top: 125%;
-      left: 0;
-      opacity: 0;
-      transition: opacity 0.3s;
-      font-size: 12px;
-    }
-    .info-tooltip:hover .tooltip-content {
-      visibility: visible;
-      opacity: 1;
-    }
   </style>
 </head>
 <body>
@@ -125,7 +124,6 @@
   <div style="display: flex; justify-content: center; align-items: flex-start; gap: 40px;">
     <div id="playerSelection" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
       <h3>Players</h3>
-
       <div class="player-row">
         <button onclick="joinGame(0)" style="background-color: gold;">Join as Jaylen 🟡</button>
         <div class="info-tooltip">
@@ -135,7 +133,6 @@
           </div>
         </div>
       </div>
-
       <div class="player-row">
         <button onclick="joinGame(1)" style="background-color: red; color: white;">Join as Samantha 🔴</button>
         <div class="info-tooltip">
@@ -145,7 +142,6 @@
           </div>
         </div>
       </div>
-
       <div class="player-row">
         <button onclick="joinGame(2)" style="background-color: blue; color: white;">Join as Marcus 🔵</button>
         <div class="info-tooltip">
@@ -155,7 +151,6 @@
           </div>
         </div>
       </div>
-
       <div class="player-row">
         <button onclick="joinGame(3)" style="background-color: green; color: white;">Join as Elena 🟢</button>
         <div class="info-tooltip">
@@ -165,7 +160,6 @@
           </div>
         </div>
       </div>
-
       <button onclick="resetGame()">Start Over</button>
     </div>
     <div>
@@ -185,28 +179,25 @@
       const board = document.getElementById('board');
       const positionDisplay = document.getElementById('position');
       const card = document.getElementById('card');
-
       let playerPositions = [1, 1, 1, 1];
       let currentPlayer = 0;
       let pendingRoll = null;
       let activePlayers = [false, false, false, false];
       const playerColors = ['gold', 'red', 'blue', 'green'];
-
       const ladders = { 4: 18, 11: 26, 29: 39 };
       const chutes = { 22: 11, 36: 17, 45: 31 };
       const cards = {
-        6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
-        10: { text: "People start calling you a troublemaker. You lose motivation. Go back 3 spaces.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } },
-        15: { text: "You meet someone who really believes in you. Move ahead 2 spaces.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 2); } },
-        19: { text: "You got profiled by the police for no reason. Go back to space 10.", effect: function() { playerPositions[this.playerIndex] = 10; } },
-        23: { text: "You do some community service and gain confidence. Move ahead 1 space.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 1); } },
-        28: { text: "Your family hits a rough patch. You're distracted. Move back 2.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 2); } },
-        33: { text: "You're surrounded by bad influences. You slip up. Move back 1.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
-        37: { text: "Your wealthy family gets you out of trouble. Move ahead 4.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 4); } },
-        42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 3); } },
-        48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } }
+        6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
+        10: { text: "People start calling you a troublemaker. You lose motivation. Go back 3 spaces.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } },
+        15: { text: "You meet someone who really believes in you. Move ahead 2 spaces.", effect: function () { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 2); } },
+        19: { text: "You got profiled by the police for no reason. Go back to space 10.", effect: function () { playerPositions[this.playerIndex] = 10; } },
+        23: { text: "You do some community service and gain confidence. Move ahead 1 space.", effect: function () { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 1); } },
+        28: { text: "Your family hits a rough patch. You're distracted. Move back 2.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 2); } },
+        33: { text: "You're surrounded by bad influences. You slip up. Move back 1.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
+        37: { text: "Your wealthy family gets you out of trouble. Move ahead 4.", effect: function () { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 4); } },
+        42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function () { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 3); } },
+        48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } }
       };
-
       for (let i = 1; i <= 50; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
@@ -223,35 +214,26 @@
         if (ladders[i]) cell.classList.add('ladder');
         if (chutes[i]) cell.classList.add('chute');
         if (cards[i]) {
-  cell.classList.add('draw-card');
-  cell.onclick = () => {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip-content';
-    tooltip.style.position = 'absolute';
-    tooltip.style.top = '100%';
-    tooltip.style.left = '0';
-    tooltip.style.backgroundColor = '#333';
-    tooltip.style.color = '#fff';
-    tooltip.style.padding = '8px';
-    tooltip.style.borderRadius = '6px';
-    tooltip.style.fontSize = '12px';
-    tooltip.style.zIndex = '10';
-    tooltip.style.width = '200px';
-    tooltip.textContent = cards[i].text;
-
-    const existingTooltip = cell.querySelector('.tooltip-content');
-    if (existingTooltip) {
-      existingTooltip.remove();
-    } else {
-      cell.appendChild(tooltip);
-      setTimeout(() => tooltip.remove(), 5000);
-    }
-  };
-}
+          cell.classList.add('draw-card');
+          const infoButton = document.createElement('button');
+          infoButton.className = 'info-button';
+          infoButton.textContent = 'ℹ️';
+          const tooltip = document.createElement('div');
+          tooltip.className = 'tooltip-content';
+          tooltip.textContent = cards[i].text;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'info-tooltip';
+          wrapper.appendChild(infoButton);
+          wrapper.appendChild(tooltip);
+          infoButton.onclick = (e) => {
+            e.stopPropagation();
+            tooltip.style.visibility = tooltip.style.visibility === 'visible' ? 'hidden' : 'visible';
+            tooltip.style.opacity = tooltip.style.opacity === '1' ? '0' : '1';
+          };
+          cell.appendChild(wrapper);
         }
         board.appendChild(cell);
       }
-
       function renderPlayer() {
         document.querySelectorAll('.player').forEach(p => p.remove());
         playerPositions.forEach((pos, index) => {
@@ -265,7 +247,6 @@
           }
         });
       }
-
       function joinGame(playerIndex) {
         if (activePlayers[playerIndex]) {
           alert('Player ' + (playerIndex + 1) + ' has already joined.');
@@ -275,30 +256,24 @@
         alert('Player ' + (playerIndex + 1) + ' joined the game!');
         renderPlayer();
       }
-
       function rollDice() {
         card.style.display = 'none';
-
         if (!activePlayers.includes(true)) {
           alert('No players have joined the game!');
           return;
         }
-
         const roll = Math.floor(Math.random() * 6) + 1;
         pendingRoll = roll;
         document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
       }
-
       function movePlayer() {
         if (pendingRoll === null) {
           alert('Please roll the dice first!');
           return;
         }
-
         let currentPos = playerPositions[currentPlayer];
         let nextPos = currentPos + pendingRoll;
         if (nextPos > 50) nextPos = 50;
-
         if (ladders[nextPos]) {
           nextPos = ladders[nextPos];
           alert('🟢 You climbed a ladder!');
@@ -306,29 +281,20 @@
           nextPos = chutes[nextPos];
           alert('🔴 You slid down a chute!');
         }
-
         playerPositions[currentPlayer] = nextPos;
-
         if (cards[nextPos]) {
           const cardData = cards[nextPos];
           cardData.effect = cardData.effect.bind({ playerIndex: currentPlayer });
           cardData.effect();
-          card.textContent = cardData.text;
-          card.style.display = 'block';
         }
-
         positionDisplay.textContent = playerPositions[currentPlayer];
         renderPlayer();
-
         pendingRoll = null;
-
         do {
           currentPlayer = (currentPlayer + 1) % 4;
         } while (!activePlayers[currentPlayer]);
-
         document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
       }
-
       function resetGame() {
         playerPositions = [1, 1, 1, 1];
         currentPlayer = 0;
@@ -339,12 +305,10 @@
         document.getElementById('diceResult').textContent = '';
         document.getElementById('turnDisplay').textContent = '🎯 Player 1\'s turn';
       }
-
       window.joinGame = joinGame;
       window.rollDice = rollDice;
       window.movePlayer = movePlayer;
       window.resetGame = resetGame;
-
       renderPlayer();
     }
   </script>
