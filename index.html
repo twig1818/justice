@@ -95,16 +95,13 @@
 </head>
 <body>
   <h1>Paths of Justice</h1>
-  <div>
-    <label for="playerSelect">Choose a player:</label>
-    <select id="playerSelect">
-      <option value="0">Player 1 (🟡)</option>
-      <option value="1">Player 2 (🔴)</option>
-      <option value="2">Player 3 (🔵)</option>
-      <option value="3">Player 4 (🟢)</option>
-    </select>
-    <button onclick="resetGame()">Start Over</button>
-  </div>
+  <div id="playerSelection" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
+  <button onclick="joinGame(0)" style="background-color: gold;">Join as Player 1 🟡</button>
+  <button onclick="joinGame(1)" style="background-color: red; color: white;">Join as Player 2 🔴</button>
+  <button onclick="joinGame(2)" style="background-color: blue; color: white;">Join as Player 3 🔵</button>
+  <button onclick="joinGame(3)" style="background-color: green; color: white;">Join as Player 4 🟢</button>
+  <button onclick="resetGame()">Start Over</button>
+</div>
 $1  <p>Player position: <span id="position">1</span></p>
   <button onclick="rollDice()">Roll Dice</button>
   <div class="card" id="card" style="display:none;"></div>
@@ -117,6 +114,7 @@ const positionDisplay = document.getElementById('position');
 const card = document.getElementById('card');
 let playerPositions = [1, 1, 1, 1];
 let currentPlayer = 0;
+let activePlayers = [false, false, false, false];
 const playerColors = ['gold', 'red', 'blue', 'green'];
 
 const ladders = { 4: 18, 11: 26, 29: 39 };
@@ -175,6 +173,16 @@ function renderPlayer() {
 window.rollDice = function() {
   const card = document.getElementById('card');
   card.style.display = 'none';
+
+  if (!activePlayers.includes(true)) {
+    alert('No players have joined the game!');
+    return;
+  }
+
+  while (!activePlayers[currentPlayer]) {
+    currentPlayer = (currentPlayer + 1) % 4;
+  }
+
   const roll = Math.floor(Math.random() * 6) + 1;
   let currentPos = playerPositions[currentPlayer];
   let nextPos = currentPos + roll;
@@ -201,7 +209,20 @@ window.rollDice = function() {
   positionDisplay.textContent = playerPositions[currentPlayer];
   renderPlayer();
 
-  currentPlayer = (currentPlayer + 1) % 4;
+  window.joinGame = function(playerIndex) {
+    if (activePlayers[playerIndex]) {
+      alert('Player ' + (playerIndex + 1) + ' has already joined.');
+      return;
+    }
+    activePlayers[playerIndex] = true;
+    alert('Player ' + (playerIndex + 1) + ' joined the game!');
+    renderPlayer();
+  };
+
+  do {
+    currentPlayer = (currentPlayer + 1) % 4;
+  } while (!activePlayers[currentPlayer]);
+};
 };
   renderPlayer();
 }
@@ -209,12 +230,13 @@ window.rollDice = function() {
 renderPlayer();
 
   window.resetGame = function() {
-    playerPositions = [1, 1, 1, 1];
-    currentPlayer = 0;
-    renderPlayer();
-    positionDisplay.textContent = playerPositions[0];
-    card.style.display = 'none';
-  };
+  playerPositions = [1, 1, 1, 1];
+  currentPlayer = 0;
+  activePlayers = [false, false, false, false];
+  renderPlayer();
+  positionDisplay.textContent = 1;
+  card.style.display = 'none';
+};
   };
   </script>
 </body>
