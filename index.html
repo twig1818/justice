@@ -32,15 +32,12 @@
       cursor: pointer;
     }
     .player {
-      background-color: gold;
       border-radius: 50%;
       width: 20px;
       height: 20px;
       position: absolute;
     }
-    .ladder {
-      background-color: #d4fdd4 !important;
-    }
+    .ladder { background-color: #d4fdd4 !important; }
     .ladder::after {
       content: "🟢 Good Choice! Move Up";
       position: absolute;
@@ -49,9 +46,7 @@
       left: 2px;
       color: green;
     }
-    .chute {
-      background-color: #fdd4d4 !important;
-    }
+    .chute { background-color: #fdd4d4 !important; }
     .chute::after {
       content: "🔴 Bad Choice! Move Down";
       position: absolute;
@@ -60,9 +55,7 @@
       left: 2px;
       color: red;
     }
-    .draw-card {
-      background-color: #d4e3fd !important;
-    }
+    .draw-card { background-color: #d4e3fd !important; }
     .draw-card::after {
       content: "📜 Draw Card";
       font-size: 10px;
@@ -71,14 +64,8 @@
       left: 2px;
       color: blue;
     }
-    .start {
-      background-color: #a8e6ff !important;
-      font-weight: bold;
-    }
-    .end {
-      background-color: #b9fbc0 !important;
-      font-weight: bold;
-    }
+    .start { background-color: #a8e6ff !important; font-weight: bold; }
+    .end { background-color: #b9fbc0 !important; font-weight: bold; }
     .card {
       margin: 20px auto;
       padding: 10px;
@@ -96,148 +83,147 @@
 <body>
   <h1>Paths of Justice</h1>
   <div id="playerSelection" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-  <button onclick="joinGame(0)" style="background-color: gold;">Join as Player 1 🟡</button>
-  <button onclick="joinGame(1)" style="background-color: red; color: white;">Join as Player 2 🔴</button>
-  <button onclick="joinGame(2)" style="background-color: blue; color: white;">Join as Player 3 🔵</button>
-  <button onclick="joinGame(3)" style="background-color: green; color: white;">Join as Player 4 🟢</button>
-  <button onclick="resetGame()">Start Over</button>
-</div>
-$1  <p>Player position: <span id="position">1</span></p>
+    <button onclick="joinGame(0)" style="background-color: gold;">Join as Player 1 🟡</button>
+    <button onclick="joinGame(1)" style="background-color: red; color: white;">Join as Player 2 🔴</button>
+    <button onclick="joinGame(2)" style="background-color: blue; color: white;">Join as Player 3 🔵</button>
+    <button onclick="joinGame(3)" style="background-color: green; color: white;">Join as Player 4 🟢</button>
+    <button onclick="resetGame()">Start Over</button>
+  </div>
+  <div id="board"></div>
+  <p>Player position: <span id="position">1</span></p>
   <button onclick="rollDice()">Roll Dice</button>
   <div class="card" id="card" style="display:none;"></div>
 
-  <!-- JavaScript remains unchanged -->
   <script>
-  window.onload = function() {
-    const board = document.getElementById('board');
-const positionDisplay = document.getElementById('position');
-const card = document.getElementById('card');
-let playerPositions = [1, 1, 1, 1];
-let currentPlayer = 0;
-let activePlayers = [false, false, false, false];
-const playerColors = ['gold', 'red', 'blue', 'green'];
+    window.onload = function () {
+      const board = document.getElementById('board');
+      const positionDisplay = document.getElementById('position');
+      const card = document.getElementById('card');
 
-const ladders = { 4: 18, 11: 26, 29: 39 };
-const chutes = { 22: 11, 36: 17, 45: 31 };
-const cards = {
-  6: { text: "Strain Theory: Missed rent payment. Move back 1 space.", effect: () => { playerPosition = Math.max(1, playerPosition - 1); } },
-  10: { text: "Labeling Theory: Labeled a troublemaker. Go back 3 spaces.", effect: () => { playerPosition = Math.max(1, playerPosition - 3); } },
-  15: { text: "Social Learning: Positive mentor. Move ahead 2 spaces.", effect: () => { playerPosition = Math.min(50, playerPosition + 2); } },
-  19: { text: "Conflict Theory: Racial profiling. Return to space 10.", effect: () => { playerPosition = 10; } },
-  23: { text: "Labeling Theory: Community service. Move ahead 1 space.", effect: () => { playerPosition = Math.min(50, playerPosition + 1); } },
-  28: { text: "Strain Theory: Family crisis. Move back 2.", effect: () => { playerPosition = Math.max(1, playerPosition - 2); } },
-  33: { text: "Social Learning: Surrounded by crime. Move back 1.", effect: () => { playerPosition = Math.max(1, playerPosition - 1); } },
-  37: { text: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.", effect: () => { playerPosition = Math.min(50, playerPosition + 4); } },
-  42: { text: "Strain Theory: Found scholarship. Move ahead 3.", effect: () => { playerPosition = Math.min(50, playerPosition + 3); } },
-  48: { text: "Labeling Theory: Falsely accused. Move back 3.", effect: () => { playerPosition = Math.max(1, playerPosition - 3); } }
-};
+      let playerPositions = [1, 1, 1, 1];
+      let currentPlayer = 0;
+      let activePlayers = [false, false, false, false];
+      const playerColors = ['gold', 'red', 'blue', 'green'];
 
-for (let i = 1; i <= 50; i++) {
-  const cell = document.createElement('div');
-  cell.className = 'cell';
-  cell.id = 'cell-' + i;
-  if (i === 1) {
-    cell.classList.add('start');
-    cell.innerHTML = `<div>1<br>Start Your Future</div>`;
-  } else if (i === 50) {
-    cell.classList.add('end');
-    cell.innerHTML = `<div>50<br>You Made the Right Choices</div>`;
-  } else {
-    cell.innerHTML = `<div>${i}</div>`;
-  }
-  if (ladders[i]) cell.classList.add('ladder');
-  if (chutes[i]) cell.classList.add('chute');
-  if (cards[i]) {
-    cell.classList.add('draw-card');
-    cell.onclick = () => {
-      const cardData = cards[i];
-      card.textContent = cardData.text;
-      card.style.display = 'block';
+      const ladders = { 4: 18, 11: 26, 29: 39 };
+      const chutes = { 22: 11, 36: 17, 45: 31 };
+      const cards = {
+        6: { text: "Strain Theory: Missed rent payment. Move back 1 space.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
+        10: { text: "Labeling Theory: Labeled a troublemaker. Go back 3 spaces.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } },
+        15: { text: "Social Learning: Positive mentor. Move ahead 2 spaces.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 2); } },
+        19: { text: "Conflict Theory: Racial profiling. Return to space 10.", effect: function() { playerPositions[this.playerIndex] = 10; } },
+        23: { text: "Labeling Theory: Community service. Move ahead 1 space.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 1); } },
+        28: { text: "Strain Theory: Family crisis. Move back 2.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 2); } },
+        33: { text: "Social Learning: Surrounded by crime. Move back 1.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
+        37: { text: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 4); } },
+        42: { text: "Strain Theory: Found scholarship. Move ahead 3.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 3); } },
+        48: { text: "Labeling Theory: Falsely accused. Move back 3.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } }
+      };
+
+      for (let i = 1; i <= 50; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.id = 'cell-' + i;
+        if (i === 1) {
+          cell.classList.add('start');
+          cell.innerHTML = `<div>1<br>Start Your Future</div>`;
+        } else if (i === 50) {
+          cell.classList.add('end');
+          cell.innerHTML = `<div>50<br>You Made the Right Choices</div>`;
+        } else {
+          cell.innerHTML = `<div>${i}</div>`;
+        }
+        if (ladders[i]) cell.classList.add('ladder');
+        if (chutes[i]) cell.classList.add('chute');
+        if (cards[i]) {
+          cell.classList.add('draw-card');
+          cell.onclick = () => {
+            const cardData = cards[i];
+            card.textContent = cardData.text;
+            card.style.display = 'block';
+          };
+        }
+        board.appendChild(cell);
+      }
+
+      function renderPlayer() {
+        document.querySelectorAll('.player').forEach(p => p.remove());
+        playerPositions.forEach((pos, index) => {
+          if (activePlayers[index]) {
+            const currentCell = document.getElementById('cell-' + pos);
+            const token = document.createElement('div');
+            token.className = 'player';
+            token.style.backgroundColor = playerColors[index];
+            token.title = 'Player ' + (index + 1);
+            currentCell.appendChild(token);
+          }
+        });
+      }
+
+      window.rollDice = function () {
+        card.style.display = 'none';
+
+        if (!activePlayers.includes(true)) {
+          alert('No players have joined the game!');
+          return;
+        }
+
+        while (!activePlayers[currentPlayer]) {
+          currentPlayer = (currentPlayer + 1) % 4;
+        }
+
+        const roll = Math.floor(Math.random() * 6) + 1;
+        let currentPos = playerPositions[currentPlayer];
+        let nextPos = currentPos + roll;
+        if (nextPos > 50) nextPos = 50;
+
+        if (ladders[nextPos]) {
+          nextPos = ladders[nextPos];
+          alert('🟢 You climbed a ladder!');
+        } else if (chutes[nextPos]) {
+          nextPos = chutes[nextPos];
+          alert('🔴 You slid down a chute!');
+        }
+
+        playerPositions[currentPlayer] = nextPos;
+
+        if (cards[nextPos]) {
+          const cardData = cards[nextPos];
+          cardData.effect = cardData.effect.bind({ playerIndex: currentPlayer });
+          cardData.effect();
+          card.textContent = cardData.text;
+          card.style.display = 'block';
+        }
+
+        positionDisplay.textContent = playerPositions[currentPlayer];
+        renderPlayer();
+
+        do {
+          currentPlayer = (currentPlayer + 1) % 4;
+        } while (!activePlayers[currentPlayer]);
+      };
+
+      window.joinGame = function (playerIndex) {
+        if (activePlayers[playerIndex]) {
+          alert('Player ' + (playerIndex + 1) + ' has already joined.');
+          return;
+        }
+        activePlayers[playerIndex] = true;
+        alert('Player ' + (playerIndex + 1) + ' joined the game!');
+        renderPlayer();
+      };
+
+      window.resetGame = function () {
+        playerPositions = [1, 1, 1, 1];
+        currentPlayer = 0;
+        activePlayers = [false, false, false, false];
+        renderPlayer();
+        positionDisplay.textContent = 1;
+        card.style.display = 'none';
+      };
+
+      renderPlayer();
     };
-  }
-  board.appendChild(cell);
-}
-
-function renderPlayer() {
-  document.querySelectorAll('.player').forEach(p => p.remove());
-  playerPositions.forEach((pos, index) => {
-    const currentCell = document.getElementById('cell-' + pos);
-    const token = document.createElement('div');
-    token.className = 'player';
-    token.style.backgroundColor = playerColors[index];
-    token.title = 'Player ' + (index + 1);
-    currentCell.appendChild(token);
-  });
-}
-
-window.rollDice = function() {
-  const card = document.getElementById('card');
-  card.style.display = 'none';
-
-  if (!activePlayers.includes(true)) {
-    alert('No players have joined the game!');
-    return;
-  }
-
-  while (!activePlayers[currentPlayer]) {
-    currentPlayer = (currentPlayer + 1) % 4;
-  }
-
-  const roll = Math.floor(Math.random() * 6) + 1;
-  let currentPos = playerPositions[currentPlayer];
-  let nextPos = currentPos + roll;
-  if (nextPos > 50) nextPos = 50;
-
-  if (ladders[nextPos]) {
-    nextPos = ladders[nextPos];
-    alert('🟢 You climbed a ladder!');
-  } else if (chutes[nextPos]) {
-    nextPos = chutes[nextPos];
-    alert('🔴 You slid down a chute!');
-  }
-
-  playerPositions[currentPlayer] = nextPos;
-
-  if (cards[nextPos]) {
-    const cardData = cards[nextPos];
-    cardData.effect = cardData.effect.bind({ playerIndex: currentPlayer });
-    cardData.effect();
-    card.textContent = cardData.text;
-    card.style.display = 'block';
-  }
-
-  positionDisplay.textContent = playerPositions[currentPlayer];
-  renderPlayer();
-
-  window.joinGame = function(playerIndex) {
-    if (activePlayers[playerIndex]) {
-      alert('Player ' + (playerIndex + 1) + ' has already joined.');
-      return;
-    }
-    activePlayers[playerIndex] = true;
-    alert('Player ' + (playerIndex + 1) + ' joined the game!');
-    renderPlayer();
-  };
-
-  do {
-    currentPlayer = (currentPlayer + 1) % 4;
-  } while (!activePlayers[currentPlayer]);
-};
-};
-  renderPlayer();
-}
-
-renderPlayer();
-
-  window.resetGame = function() {
-  playerPositions = [1, 1, 1, 1];
-  currentPlayer = 0;
-  activePlayers = [false, false, false, false];
-  renderPlayer();
-  positionDisplay.textContent = 1;
-  card.style.display = 'none';
-};
-  };
   </script>
 </body>
 </html>
