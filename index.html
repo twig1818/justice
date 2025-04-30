@@ -224,18 +224,30 @@
         if (chutes[i]) cell.classList.add('chute');
         if (cards[i]) {
   cell.classList.add('draw-card');
-  const tooltip = document.createElement('div');
-  tooltip.className = 'info-tooltip';
-  const button = document.createElement('button');
-  button.className = 'info-button';
-  button.textContent = 'ℹ️';
-  const tooltipText = document.createElement('div');
-  tooltipText.className = 'tooltip-content';
-  tooltipText.textContent = cards[i].text;
-  tooltip.appendChild(button);
-  tooltip.appendChild(tooltipText);
-  cell.appendChild(tooltip);
-};
+  cell.onclick = () => {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip-content';
+    tooltip.style.position = 'absolute';
+    tooltip.style.top = '100%';
+    tooltip.style.left = '0';
+    tooltip.style.backgroundColor = '#333';
+    tooltip.style.color = '#fff';
+    tooltip.style.padding = '8px';
+    tooltip.style.borderRadius = '6px';
+    tooltip.style.fontSize = '12px';
+    tooltip.style.zIndex = '10';
+    tooltip.style.width = '200px';
+    tooltip.textContent = cards[i].text;
+
+    const existingTooltip = cell.querySelector('.tooltip-content');
+    if (existingTooltip) {
+      existingTooltip.remove();
+    } else {
+      cell.appendChild(tooltip);
+      setTimeout(() => tooltip.remove(), 5000);
+    }
+  };
+}
         }
         board.appendChild(cell);
       }
