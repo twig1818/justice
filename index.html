@@ -175,18 +175,10 @@ let pendingRoll = null;
           return;
         }
 
-        while (!activePlayers[currentPlayer]) {
-          currentPlayer = (currentPlayer + 1) % 4;
-        }
-
         const roll = Math.floor(Math.random() * 6) + 1;
         pendingRoll = roll;
         document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
       };
-
-        do {
-          currentPlayer = (currentPlayer + 1) % 4;
-        } while (!activePlayers[currentPlayer]);
       };
 
       window.joinGame = function (playerIndex) {
