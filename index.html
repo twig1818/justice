@@ -131,7 +131,7 @@
         <div class="info-tooltip">
           <button class="info-button">ℹ️</button>
           <div class="tooltip-content">
-            Jaylen – Low-income background. Faces pressure to hustle. Influenced by media and limited options. (Strain Theory)
+            Jaylen – He’s trying to do the right thing but life keeps throwing him curveballs. He might make risky choices just to survive. (Strain Theory)
           </div>
         </div>
       </div>
@@ -141,7 +141,7 @@
         <div class="info-tooltip">
           <button class="info-button">ℹ️</button>
           <div class="tooltip-content">
-            Samantha – Middle-class teen labeled early. Risks self-fulfilling prophecy. (Labeling Theory)
+            Samantha – One mistake and now everyone treats her like a criminal. That kind of label sticks and it’s messing with her future. (Labeling Theory)
           </div>
         </div>
       </div>
@@ -151,7 +151,7 @@
         <div class="info-tooltip">
           <button class="info-button">ℹ️</button>
           <div class="tooltip-content">
-            Marcus – Surrounded by crime and peers. Learns behavior from others. (Social Learning Theory)
+            Marcus – All his friends are doing it, and that’s how he’s learning what’s “normal.” He’s picking up habits from the people around him. (Social Learning Theory)
           </div>
         </div>
       </div>
@@ -161,7 +161,7 @@
         <div class="info-tooltip">
           <button class="info-button">ℹ️</button>
           <div class="tooltip-content">
-            Elena – Activist who sees justice through race and class inequality. (Conflict Theory)
+            Elena – She sees how unfair the system is, especially for people who look like her. She wants change but faces constant obstacles. (Conflict Theory)
           </div>
         </div>
       </div>
@@ -180,7 +180,6 @@
     <button onclick="movePlayer()">Move Player</button>
     <div class="card" id="card" style="display:none;"></div>
   </div>
-
   <script>
     window.onload = function () {
       const board = document.getElementById('board');
@@ -196,16 +195,16 @@
       const ladders = { 4: 18, 11: 26, 29: 39 };
       const chutes = { 22: 11, 36: 17, 45: 31 };
       const cards = {
-        6: { text: "Strain Theory: Missed rent payment. Move back 1 space.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
-        10: { text: "Labeling Theory: Labeled a troublemaker. Go back 3 spaces.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } },
-        15: { text: "Social Learning: Positive mentor. Move ahead 2 spaces.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 2); } },
-        19: { text: "Conflict Theory: Racial profiling. Return to space 10.", effect: function() { playerPositions[this.playerIndex] = 10; } },
-        23: { text: "Labeling Theory: Community service. Move ahead 1 space.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 1); } },
-        28: { text: "Strain Theory: Family crisis. Move back 2.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 2); } },
-        33: { text: "Social Learning: Surrounded by crime. Move back 1.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
-        37: { text: "Conflict Theory: Avoided conviction due to wealth. Move ahead 4.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 4); } },
-        42: { text: "Strain Theory: Found scholarship. Move ahead 3.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 3); } },
-        48: { text: "Labeling Theory: Falsely accused. Move back 3.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } }
+        6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
+        10: { text: "People start calling you a troublemaker. You lose motivation. Go back 3 spaces.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } },
+        15: { text: "You meet someone who really believes in you. Move ahead 2 spaces.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 2); } },
+        19: { text: "You got profiled by the police for no reason. Go back to space 10.", effect: function() { playerPositions[this.playerIndex] = 10; } },
+        23: { text: "You do some community service and gain confidence. Move ahead 1 space.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 1); } },
+        28: { text: "Your family hits a rough patch. You're distracted. Move back 2.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 2); } },
+        33: { text: "You're surrounded by bad influences. You slip up. Move back 1.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
+        37: { text: "Your wealthy family gets you out of trouble. Move ahead 4.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 4); } },
+        42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function() { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 3); } },
+        48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function() { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } }
       };
 
       for (let i = 1; i <= 50; i++) {
