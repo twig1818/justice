@@ -91,13 +91,10 @@
   </div>
   <div id="board"></div>
   <p>Player position: <span id="position">1</span></p>
-<p id="turnDisplay">🎯 Player 1's turn</p>
-<p id="diceResult"></p>
-<button onclick="rollDice()">Roll Dice</button>
-<button onclick="movePlayer()">Move Player</button>
-  <p id="turnDisplay"></p>
-$1
-$1
+  <p id="turnDisplay">🎯 Player 1's turn</p>
+  <p id="diceResult"></p>
+  <button onclick="rollDice()">Roll Dice</button>
+  <button onclick="movePlayer()">Move Player</button>
   <div class="card" id="card" style="display:none;"></div>
 
   <script>
@@ -108,7 +105,7 @@ $1
 
       let playerPositions = [1, 1, 1, 1];
       let currentPlayer = 0;
-let pendingRoll = null;
+      let pendingRoll = null;
       let activePlayers = [false, false, false, false];
       const playerColors = ['gold', 'red', 'blue', 'green'];
 
@@ -167,7 +164,17 @@ let pendingRoll = null;
         });
       }
 
-      window.rollDice = function () {
+      function joinGame(playerIndex) {
+        if (activePlayers[playerIndex]) {
+          alert('Player ' + (playerIndex + 1) + ' has already joined.');
+          return;
+        }
+        activePlayers[playerIndex] = true;
+        alert('Player ' + (playerIndex + 1) + ' joined the game!');
+        renderPlayer();
+      }
+
+      function rollDice() {
         card.style.display = 'none';
 
         if (!activePlayers.includes(true)) {
@@ -178,19 +185,9 @@ let pendingRoll = null;
         const roll = Math.floor(Math.random() * 6) + 1;
         pendingRoll = roll;
         document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
-      };
-      };
-
-      function joinGame(playerIndex) {
-        if (activePlayers[playerIndex]) {
-          alert('Player ' + (playerIndex + 1) + ' has already joined.');
-          return;
-        }
-        activePlayers[playerIndex] = true;
-        alert('Player ' + (playerIndex + 1) + ' joined the game!');
-        renderPlayer();
       }
-function movePlayer() {
+
+      function movePlayer() {
         if (pendingRoll === null) {
           alert('Please roll the dice first!');
           return;
@@ -230,7 +227,7 @@ function movePlayer() {
         document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
       }
 
-function resetGame() {
+      function resetGame() {
         playerPositions = [1, 1, 1, 1];
         currentPlayer = 0;
         activePlayers = [false, false, false, false];
@@ -241,16 +238,13 @@ function resetGame() {
         document.getElementById('turnDisplay').textContent = '🎯 Player 1\'s turn';
       }
 
+      window.joinGame = joinGame;
+      window.rollDice = rollDice;
+      window.movePlayer = movePlayer;
+      window.resetGame = resetGame;
+
       renderPlayer();
-    };
-  window.joinGame = joinGame;
-    window.movePlayer = movePlayer;
-    window.resetGame = resetGame;
-    renderPlayer();
-    };
-    window.joinGame = joinGame;
-    window.movePlayer = movePlayer;
-    window.resetGame = resetGame;
+    }
   </script>
 </body>
-</html>
+</html> 
