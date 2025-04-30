@@ -180,34 +180,9 @@ let pendingRoll = null;
         }
 
         const roll = Math.floor(Math.random() * 6) + 1;
-pendingRoll = roll;
-document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
-        let currentPos = playerPositions[currentPlayer];
-        let nextPos = currentPos + roll;
-        if (nextPos > 50) nextPos = 50;
-
-        if (ladders[nextPos]) {
-          nextPos = ladders[nextPos];
-          alert('🟢 You climbed a ladder!');
-        } else if (chutes[nextPos]) {
-          nextPos = chutes[nextPos];
-          alert('🔴 You slid down a chute!');
-        }
-
-        playerPositions[currentPlayer] = nextPos;
-
-        if (cards[nextPos]) {
-          const cardData = cards[nextPos];
-          cardData.effect = cardData.effect.bind({ playerIndex: currentPlayer });
-          cardData.effect();
-          card.textContent = cardData.text;
-          card.style.display = 'block';
-        }
-
-        positionDisplay.textContent = playerPositions[currentPlayer];
-        renderPlayer();
-        document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
-        pendingRoll = null;
+        pendingRoll = roll;
+        document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
+      };
 
         do {
           currentPlayer = (currentPlayer + 1) % 4;
