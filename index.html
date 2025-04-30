@@ -94,6 +94,7 @@
 <p id="turnDisplay">🎯 Player 1's turn</p>
 <p id="diceResult"></p>
 <button onclick="rollDice()">Roll Dice</button>
+<button onclick="movePlayer()">Move Player</button>
   <p id="turnDisplay"></p>
 $1
 $1
@@ -107,6 +108,7 @@ $1
 
       let playerPositions = [1, 1, 1, 1];
       let currentPlayer = 0;
+let pendingRoll = null;
       let activePlayers = [false, false, false, false];
       const playerColors = ['gold', 'red', 'blue', 'green'];
 
@@ -178,6 +180,7 @@ $1
         }
 
         const roll = Math.floor(Math.random() * 6) + 1;
+pendingRoll = roll;
 document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
         let currentPos = playerPositions[currentPlayer];
         let nextPos = currentPos + roll;
@@ -203,7 +206,8 @@ document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
 
         positionDisplay.textContent = playerPositions[currentPlayer];
         renderPlayer();
-document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
+        document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
+        pendingRoll = null;
 
         do {
           currentPlayer = (currentPlayer + 1) % 4;
@@ -220,7 +224,47 @@ document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPl
         renderPlayer();
       };
 
-      window.resetGame = function () {
+      window.movePlayer = function () {
+  if (pendingRoll === null) {
+    alert('Please roll the dice first!');
+    return;
+  }
+
+  let currentPos = playerPositions[currentPlayer];
+  let nextPos = currentPos + pendingRoll;
+  if (nextPos > 50) nextPos = 50;
+
+  if (ladders[nextPos]) {
+    nextPos = ladders[nextPos];
+    alert('🟢 You climbed a ladder!');
+  } else if (chutes[nextPos]) {
+    nextPos = chutes[nextPos];
+    alert('🔴 You slid down a chute!');
+  }
+
+  playerPositions[currentPlayer] = nextPos;
+
+  if (cards[nextPos]) {
+    const cardData = cards[nextPos];
+    cardData.effect = cardData.effect.bind({ playerIndex: currentPlayer });
+    cardData.effect();
+    card.textContent = cardData.text;
+    card.style.display = 'block';
+  }
+
+  positionDisplay.textContent = playerPositions[currentPlayer];
+  renderPlayer();
+
+  pendingRoll = null;
+
+  do {
+    currentPlayer = (currentPlayer + 1) % 4;
+  } while (!activePlayers[currentPlayer]);
+
+  document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
+};
+
+window.resetGame = function () {
         playerPositions = [1, 1, 1, 1];
         currentPlayer = 0;
         activePlayers = [false, false, false, false];
