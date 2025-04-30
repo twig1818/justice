@@ -95,8 +95,17 @@
 </head>
 <body>
   <h1>Paths of Justice</h1>
-  <div id="board"></div>
-  <p>Player position: <span id="position">1</span></p>
+  <div>
+    <label for="playerSelect">Choose a player:</label>
+    <select id="playerSelect">
+      <option value="0">Player 1 (🟡)</option>
+      <option value="1">Player 2 (🔴)</option>
+      <option value="2">Player 3 (🔵)</option>
+      <option value="3">Player 4 (🟢)</option>
+    </select>
+    <button onclick="resetGame()">Start Over</button>
+  </div>
+$1  <p>Player position: <span id="position">1</span></p>
   <button onclick="rollDice()">Roll Dice</button>
   <div class="card" id="card" style="display:none;"></div>
 
@@ -106,7 +115,9 @@
     const board = document.getElementById('board');
 const positionDisplay = document.getElementById('position');
 const card = document.getElementById('card');
-let playerPosition = 1;
+let playerPositions = [1, 1, 1, 1];
+let currentPlayer = 0;
+const playerColors = ['gold', 'red', 'blue', 'green'];
 
 const ladders = { 4: 18, 11: 26, 29: 39 };
 const chutes = { 22: 11, 36: 17, 45: 31 };
@@ -151,16 +162,22 @@ for (let i = 1; i <= 50; i++) {
 
 function renderPlayer() {
   document.querySelectorAll('.player').forEach(p => p.remove());
-  const currentCell = document.getElementById('cell-' + playerPosition);
-  const token = document.createElement('div');
-  token.className = 'player';
-  currentCell.appendChild(token);
+  playerPositions.forEach((pos, index) => {
+    const currentCell = document.getElementById('cell-' + pos);
+    const token = document.createElement('div');
+    token.className = 'player';
+    token.style.backgroundColor = playerColors[index];
+    token.title = 'Player ' + (index + 1);
+    currentCell.appendChild(token);
+  });
 }
 
 window.rollDice = function() {
+  const card = document.getElementById('card');
   card.style.display = 'none';
   const roll = Math.floor(Math.random() * 6) + 1;
-  let nextPos = playerPosition + roll;
+  let currentPos = playerPositions[currentPlayer];
+  let nextPos = currentPos + roll;
   if (nextPos > 50) nextPos = 50;
 
   if (ladders[nextPos]) {
@@ -171,20 +188,33 @@ window.rollDice = function() {
     alert('🔴 You slid down a chute!');
   }
 
-  playerPosition = nextPos;
+  playerPositions[currentPlayer] = nextPos;
 
-  if (cards[playerPosition]) {
-    const cardData = cards[playerPosition];
+  if (cards[nextPos]) {
+    const cardData = cards[nextPos];
+    cardData.effect = cardData.effect.bind({ playerIndex: currentPlayer });
     cardData.effect();
     card.textContent = cardData.text;
     card.style.display = 'block';
   }
 
-  positionDisplay.textContent = playerPosition;
+  positionDisplay.textContent = playerPositions[currentPlayer];
+  renderPlayer();
+
+  currentPlayer = (currentPlayer + 1) % 4;
+};
   renderPlayer();
 }
 
 renderPlayer();
+
+  window.resetGame = function() {
+    playerPositions = [1, 1, 1, 1];
+    currentPlayer = 0;
+    renderPlayer();
+    positionDisplay.textContent = playerPositions[0];
+    card.style.display = 'none';
+  };
   };
   </script>
 </body>
