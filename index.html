@@ -21,7 +21,7 @@
       gap: 4px;
       margin: 20px auto;
       width: max-content;
-      position: relative; /* Ensure board is a positioning context */
+      position: relative;
     }
     .cell {
       background-color: lightgray;
@@ -44,8 +44,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      transition: transform 0.3s ease-in-out; /* Smooth movement animation */
-      z-index: 10; /* Ensure tokens are above cell content */
+      transition: transform 0.3s ease-in-out;
+      z-index: 10;
     }
     .ladder { background-color: #d4fdd4 !important; }
     .ladder::after {
@@ -222,7 +222,7 @@
         this.rollButton = document.querySelector('button[onclick="game.rollDice()"]');
         this.moveButton = document.querySelector('button[onclick="game.movePlayer()"]');
         this.cells = {};
-        this.playerTokens = [null, null, null, null]; // Store tokens for animation
+        this.playerTokens = [null, null, null, null];
         this.cellSize = 94; // Cell width/height (90px + 4px gap)
         this.ladders = { 4: 18, 11: 26, 29: 39 };
         this.chutes = { 22: 11, 36: 17, 45: 31 };
@@ -284,23 +284,27 @@
       getCellCoordinates(position) {
         const row = Math.floor((position - 1) / 10);
         const col = (position - 1) % 10;
-        const x = col * this.cellSize + this.cellSize / 2;
-        const y = row * this.cellSize + this.cellSize / 2;
+        const x = col * this.cellSize;
+        const y = row * this.cellSize;
         return { x, y };
       }
 
       animateToken(playerIndex, fromPos, toPos) {
         return new Promise(resolve => {
           const token = this.playerTokens[playerIndex];
-          if (!token) return resolve();
+          if (!token || fromPos === toPos) return resolve();
 
           const fromCoords = this.getCellCoordinates(fromPos);
           const toCoords = this.getCellCoordinates(toPos);
           const dx = toCoords.x - fromCoords.x;
           const dy = toCoords.y - fromCoords.y;
 
-          token.style.transform = `translate(${dx}px, ${dy}px)`;
+          // Apply translation for animation
+          token.style.transform = `translate(${dx - 50}%, ${dy - 50}%)`;
           token.addEventListener('transitionend', () => {
+            // Move token to new cell
+            this.cells[toPos].appendChild(token);
+            // Reset transform to center in new cell
             token.style.transform = 'translate(-50%, -50%)';
             resolve();
           }, { once: true });
@@ -323,6 +327,11 @@
         let positionsText = '';
         this.playerPositions.forEach((pos, index) => {
           if (this.activePlayers[index]) {
+            const token = this.playerTokens[index];
+            if (token && token.parentNode !== this.cells[pos]) {
+              this.cells[pos].appendChild(token);
+              token.style.transform = 'translate(-50%, -50%)';
+            }
             positionsText += `${this.playerNames[index]}: ${pos} | `;
           }
         });
@@ -366,7 +375,7 @@
           return;
         }
 
-        this.moveButton.disabled = true; // Disable during animation
+        this.moveButton.disabled = true;
         const currentPos = this.playerPositions[this.currentPlayer];
         let nextPos = Math.min(50, currentPos + this.pendingRoll);
 
@@ -421,7 +430,7 @@
           }
         }
 
-        this.renderPlayer();
+        await this.renderPlayer();
         this.pendingRoll = null;
         this.nextTurn();
         this.moveButton.disabled = false;
@@ -460,3 +469,4 @@
   </script>
 </body>
 </html>
+
