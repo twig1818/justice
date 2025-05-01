@@ -23,7 +23,6 @@
       width: max-content;
       position: relative;
       min-height: 470px;
-      border: 2px solid red; /* Debugging border */
     }
     .cell {
       background-color: lightgray;
@@ -333,7 +332,13 @@
         this.playerTokens = [null, null, null, null];
         this.cellSize = 94;
         this.ladders = { 4: 18, 11: 26, 29: 39 };
-        this.chutes = { 22: 11, 36: 17, 45: 31 };
+        // Updated chutes with theory-based descriptions
+        this.chutes = {
+          25: { to: 14, message: "🔴 Strain Theory: You felt overwhelmed by life's pressures and made a desperate choice to get ahead. It backfired—slide down!" },
+          30: { to: 20, message: "🔴 Labeling Theory: Society labeled you as a troublemaker after a small mistake, and the stigma made you slip up again—slide down!" },
+          40: { to: 28, message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down!" },
+          47: { to: 35, message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down!" }
+        };
         this.cards = {
           6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 1); } },
           10: { text: "People start calling you a troublemaker. You lose motivation. Go back 3 spaces.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
@@ -632,8 +637,9 @@
             this.playerPositions[this.currentPlayer] = nextPos;
           }
           else if (this.chutes[nextPos]) {
-            const chutePos = this.chutes[nextPos];
-            this.showModal('Chute!', `🔴 You slid down a chute! Moving to position ${chutePos}!`);
+            const chuteData = this.chutes[nextPos];
+            const chutePos = chuteData.to;
+            this.showModal('Chute!', `${chuteData.message}\nMoving to position ${chutePos}!`);
             await this.animateToken(this.currentPlayer, nextPos, chutePos);
             nextPos = chutePos;
             this.playerPositions[this.currentPlayer] = nextPos;
