@@ -252,7 +252,7 @@
             cell.setAttribute('role', 'gridcell');
             cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cards[i] ? ', draw card' : ''}`);
             cell.tabIndex = 0;
-            cell.dataset.position = i; // Store position for click handling
+            cell.dataset.position = i;
             cell.addEventListener('click', () => this.handleCellClick(i));
             this.cells[i] = cell;
 
@@ -464,14 +464,14 @@
 
           if (this.ladders[nextPos]) {
             const ladderPos = this.ladders[nextPos];
-            alert('🟢 You climbed a ladder!');
+            alert('🟢 You climbed a ladder! Moving to position ' + ladderPos + '!');
             await this.animateToken(this.currentPlayer, nextPos, ladderPos);
             nextPos = ladderPos;
             this.playerPositions[this.currentPlayer] = nextPos;
           }
           else if (this.chutes[nextPos]) {
             const chutePos = this.chutes[nextPos];
-            alert('🔴 You slid down a chute!');
+            alert('🔴 You slid down a chute! Moving to position ' + chutePos + '!');
             await this.animateToken(this.currentPlayer, nextPos, chutePos);
             nextPos = chutePos;
             this.playerPositions[this.currentPlayer] = nextPos;
@@ -480,9 +480,14 @@
           if (this.cards[nextPos]) {
             const cardData = this.cards[nextPos];
             console.log(`Card effect at position ${nextPos}: ${cardData.text}`);
+            const prevPos = this.playerPositions[this.currentPlayer];
             cardData.effect(this);
             const newPos = this.playerPositions[this.currentPlayer];
             console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
+            
+            // Show alert with card message and resulting position
+            alert(`${cardData.text}\nYou moved to position ${newPos}!`);
+
             if (newPos !== nextPos) {
               await this.animateToken(this.currentPlayer, nextPos, newPos);
               this.playerPositions[this.currentPlayer] = newPos;
