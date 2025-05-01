@@ -137,6 +137,56 @@
       margin: 10px 0 5px 0;
       font-size: 14px;
     }
+    /* Modal styles */
+    #joinModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    #joinModalContent {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      text-align: left;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    #joinModalContent h3 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+    #joinModalContent p {
+      margin: 0 0 20px 0;
+      font-size: 14px;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .modal-buttons button {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #joinModalJoin {
+      background-color: #4CAF50;
+      color: white;
+    }
+    #joinModalCancel {
+      background-color: #f44336;
+      color: white;
+    }
     @media (max-width: 600px) {
       #board {
         grid-template-columns: repeat(10, 60px);
@@ -157,6 +207,19 @@
       }
       #playerSelection p {
         font-size: 12px;
+      }
+      #joinModalContent {
+        padding: 15px;
+      }
+      #joinModalContent h3 {
+        font-size: 16px;
+      }
+      #joinModalContent p {
+        font-size: 12px;
+      }
+      .modal-buttons button {
+        font-size: 12px;
+        padding: 6px 12px;
       }
     }
   </style>
@@ -202,7 +265,6 @@
           </div>
         </div>
       </div>
-      <!-- Moved elements here, before the Start Over button -->
       <p>Player positions: <span id="positions">No players</span></p>
       <p id="turnDisplay">🎯 Player 1's turn</p>
       <p id="diceResult"></p>
@@ -215,6 +277,17 @@
   </div>
   <div style="margin-top: 20px;">
     <div class="card" id="card" style="display:none;" role="alert"></div>
+  </div>
+  <!-- Added modal for joining players -->
+  <div id="joinModal" role="dialog" aria-labelledby="joinModalTitle" aria-modal="true">
+    <div id="joinModalContent">
+      <h3 id="joinModalTitle"></h3>
+      <p id="joinModalDescription"></p>
+      <div class="modal-buttons">
+        <button id="joinModalCancel" aria-label="Cancel joining">Cancel</button>
+        <button id="joinModalJoin" aria-label="Confirm joining">Join</button>
+      </div>
+    </div>
   </div>
   <script>
     class Game {
@@ -255,6 +328,13 @@
           42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         };
+        // Modal elements
+        this.joinModal = document.getElementById('joinModal');
+        this.joinModalTitle = document.getElementById('joinModalTitle');
+        this.joinModalDescription = document.getElementById('joinModalDescription');
+        this.joinModalJoin = document.getElementById('joinModalJoin');
+        this.joinModalCancel = document.getElementById('joinModalCancel');
+        this.currentJoinIndex = null; // To track which player is being joined
       }
 
       initBoard() {
@@ -411,13 +491,38 @@
             alert(`${this.playerNames[playerIndex]} has already joined.`);
             return;
           }
-          this.activePlayers[playerIndex] = true;
-          alert(`${this.playerNames[playerIndex]} joined the game!\n\n${this.playerDescriptions[playerIndex]}`);
-          this.renderPlayer();
-          this.updateButtonState();
-          if (this.currentPlayer === playerIndex && !this.activePlayers[this.currentPlayer]) {
-            this.nextTurn();
-          }
+
+          // Show modal with player info
+          this.currentJoinIndex = playerIndex;
+          this.joinModalTitle.textContent = `${this.playerNames[playerIndex]}'s Profile`;
+          this.joinModalDescription.textContent = this.playerDescriptions[playerIndex];
+          this.joinModal.style.display = 'flex';
+
+          // Remove any existing event listeners to avoid duplicates
+          const joinButtonClone = this.joinModalJoin.cloneNode(true);
+          this.joinModalJoin.parentNode.replaceChild(joinButtonClone, this.joinModalJoin);
+          this.joinModalJoin = joinButtonClone;
+
+          const cancelButtonClone = this.joinModalCancel.cloneNode(true);
+          this.joinModalCancel.parentNode.replaceChild(cancelButtonClone, this.joinModalCancel);
+          this.joinModalCancel = cancelButtonClone;
+
+          // Add event listeners for Join and Cancel buttons
+          this.joinModalJoin.addEventListener('click', () => {
+            this.activePlayers[playerIndex] = true;
+            this.renderPlayer();
+            this.updateButtonState();
+            if (this.currentPlayer === playerIndex && !this.activePlayers[this.currentPlayer]) {
+              this.nextTurn();
+            }
+            this.joinModal.style.display = 'none';
+            this.currentJoinIndex = null;
+          });
+
+          this.joinModalCancel.addEventListener('click', () => {
+            this.joinModal.style.display = 'none';
+            this.currentJoinIndex = null;
+          });
         } catch (error) {
           console.error('Error in joinGame:', error.message, error.stack);
           alert('Failed to join the game. Please refresh the page.');
