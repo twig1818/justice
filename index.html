@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,6 +21,7 @@
       gap: 4px;
       margin: 20px auto;
       width: max-content;
+      position: relative; /* Ensure board is a positioning context */
     }
     .cell {
       background-color: lightgray;
@@ -42,6 +41,11 @@
       width: 20px;
       height: 20px;
       position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.3s ease-in-out; /* Smooth movement animation */
+      z-index: 10; /* Ensure tokens are above cell content */
     }
     .ladder { background-color: #d4fdd4 !important; }
     .ladder::after {
@@ -97,7 +101,7 @@
       border: 1px solid #333;
       background: #fff;
       max-width: 400px;
-      font-size: 14 14px;
+      font-size: 14px;
     }
     button {
       margin-top: 10px;
@@ -218,6 +222,8 @@
         this.rollButton = document.querySelector('button[onclick="game.rollDice()"]');
         this.moveButton = document.querySelector('button[onclick="game.movePlayer()"]');
         this.cells = {};
+        this.playerTokens = [null, null, null, null]; // Store tokens for animation
+        this.cellSize = 94; // Cell width/height (90px + 4px gap)
         this.ladders = { 4: 18, 11: 26, 29: 39 };
         this.chutes = { 22: 11, 36: 17, 45: 31 };
         this.cards = {
@@ -275,18 +281,48 @@
         }
       }
 
-      renderPlayer() {
-        document.querySelectorAll('.player').forEach(p => p.remove());
-        let positionsText = '';
+      getCellCoordinates(position) {
+        const row = Math.floor((position - 1) / 10);
+        const col = (position - 1) % 10;
+        const x = col * this.cellSize + this.cellSize / 2;
+        const y = row * this.cellSize + this.cellSize / 2;
+        return { x, y };
+      }
+
+      animateToken(playerIndex, fromPos, toPos) {
+        return new Promise(resolve => {
+          const token = this.playerTokens[playerIndex];
+          if (!token) return resolve();
+
+          const fromCoords = this.getCellCoordinates(fromPos);
+          const toCoords = this.getCellCoordinates(toPos);
+          const dx = toCoords.x - fromCoords.x;
+          const dy = toCoords.y - fromCoords.y;
+
+          token.style.transform = `translate(${dx}px, ${dy}px)`;
+          token.addEventListener('transitionend', () => {
+            token.style.transform = 'translate(-50%, -50%)';
+            resolve();
+          }, { once: true });
+        });
+      }
+
+      async renderPlayer() {
         this.playerPositions.forEach((pos, index) => {
-          if (this.activePlayers[index]) {
-            const currentCell = this.cells[pos];
+          if (this.activePlayers[index] && !this.playerTokens[index]) {
             const token = document.createElement('div');
             token.className = 'player';
             token.style.backgroundColor = this.playerColors[index];
             token.title = `${this.playerNames[index]} (Player ${index + 1})`;
             token.setAttribute('aria-label', `${this.playerNames[index]} at position ${pos}`);
-            currentCell.appendChild(token);
+            this.cells[pos].appendChild(token);
+            this.playerTokens[index] = token;
+          }
+        });
+
+        let positionsText = '';
+        this.playerPositions.forEach((pos, index) => {
+          if (this.activePlayers[index]) {
             positionsText += `${this.playerNames[index]}: ${pos} | `;
           }
         });
@@ -324,40 +360,63 @@
         this.diceResult.textContent = `🎲 Rolled: ${roll}`;
       }
 
-      movePlayer() {
+      async movePlayer() {
         if (this.pendingRoll === null) {
           alert('Please roll the dice first!');
           return;
         }
-        let currentPos = this.playerPositions[this.currentPlayer];
+
+        this.moveButton.disabled = true; // Disable during animation
+        const currentPos = this.playerPositions[this.currentPlayer];
         let nextPos = Math.min(50, currentPos + this.pendingRoll);
 
-        if (this.ladders[nextPos]) {
-          nextPos = this.ladders[nextPos];
-          alert('🟢 You climbed a ladder!');
-        } else if (this.chutes[nextPos]) {
-          nextPos = this.chutes[nextPos];
-          alert('🔴 You slid down a chute!');
-        }
-
+        // Animate to rolled position
+        await this.animateToken(this.currentPlayer, currentPos, nextPos);
         this.playerPositions[this.currentPlayer] = nextPos;
 
+        // Handle ladder
+        if (this.ladders[nextPos]) {
+          const ladderPos = this.ladders[nextPos];
+          alert('🟢 You climbed a ladder!');
+          await this.animateToken(this.currentPlayer, nextPos, ladderPos);
+          nextPos = ladderPos;
+          this.playerPositions[this.currentPlayer] = nextPos;
+        }
+        // Handle chute
+        else if (this.chutes[nextPos]) {
+          const chutePos = this.chutes[nextPos];
+          alert('🔴 You slid down a chute!');
+          await this.animateToken(this.currentPlayer, nextPos, chutePos);
+          nextPos = chutePos;
+          this.playerPositions[this.currentPlayer] = nextPos;
+        }
+
+        // Handle card
         if (this.cards[nextPos]) {
           const cardData = this.cards[nextPos];
           cardData.effect = cardData.effect.bind({ playerIndex: this.currentPlayer, playerPositions: this.playerPositions });
+          const prevPos = this.playerPositions[this.currentPlayer];
           cardData.effect();
+          const newPos = this.playerPositions[this.currentPlayer];
+          if (newPos !== prevPos) {
+            await this.animateToken(this.currentPlayer, prevPos, newPos);
+          }
           this.card.textContent = cardData.text;
           this.card.style.display = 'block';
         } else {
           this.card.style.display = 'none';
         }
 
+        // Check for win
         if (this.playerPositions[this.currentPlayer] >= 50) {
           alert(`${this.playerNames[this.currentPlayer]} wins!`);
+          this.playerTokens[this.currentPlayer].remove();
+          this.playerTokens[this.currentPlayer] = null;
           this.activePlayers[this.currentPlayer] = false;
           if (!this.activePlayers.includes(true)) {
             alert('Game Over! All players have finished.');
             this.resetGame();
+            this.moveButton.disabled = false;
             return;
           }
         }
@@ -365,6 +424,7 @@
         this.renderPlayer();
         this.pendingRoll = null;
         this.nextTurn();
+        this.moveButton.disabled = false;
       }
 
       nextTurn() {
@@ -380,6 +440,8 @@
         this.currentPlayer = 0;
         this.pendingRoll = null;
         this.activePlayers = [false, false, false, false];
+        this.playerTokens.forEach(token => token?.remove());
+        this.playerTokens = [null, null, null, null];
         this.renderPlayer();
         this.card.style.display = 'none';
         this.diceResult.textContent = '';
@@ -391,11 +453,10 @@
     window.onload = function () {
       const game = new Game();
       game.initBoard();
-      window.game = game; // Expose game instance for button onclick handlers
+      window.game = game;
       game.renderPlayer();
       game.updateButtonState();
     };
   </script>
 </body>
 </html>
-
