@@ -367,7 +367,6 @@
           28: { text: "Your family hits a rough patch. You're distracted. Move back 2.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
           33: { text: "You're surrounded by bad influences. You slip up. Move back 1.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 1); } },
           37: { text: "Your wealthy family gets you out of trouble. Move ahead 4.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
-          42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         };
         this.currentJoinIndex = null;
