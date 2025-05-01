@@ -733,7 +733,7 @@
 
       drawRandomCard() {
         const randomIndex = Math.floor(Math.random() * this.cardPool.length);
-        return this.cardPool[randomIndex];
+        return { card: this.cardPool[randomIndex], index: randomIndex };
       }
 
       getCellCoordinates(position) {
@@ -1029,10 +1029,15 @@
           }
 
           if (this.cardCells.includes(nextPos)) {
-            this.isDrawCardPending = true;
-            this.lastCardPosition = nextPos;
-            this.drawCardButton.disabled = false;
-            this.showModal('Draw a Card', 'Please click the "Draw Card" button on the deck below to draw your card.');
+            if (this.isDrawCardPending) {
+              this.showModal('Draw a Card', 'You already have a pending card draw. Please click the "Draw Card" button on the deck below to draw your card.');
+            } else {
+              this.isDrawCardPending = true;
+              this.lastCardPosition = nextPos;
+              this.drawCardButton.disabled = false;
+              this.updateCardStack();
+              this.showModal('Draw a Card', 'Please click the "Draw Card" button on the deck below to draw your card.');
+            }
           } else {
             this.card.style.display = 'none';
           }
@@ -1093,14 +1098,14 @@
           this.isDrawCardPending = false;
           this.drawCardButton.disabled = true;
           const nextPos = this.lastCardPosition;
-          const cardData = this.drawRandomCard();
+          const { card: cardData, index: cardIndex } = this.drawRandomCard();
           console.log(`Drew card at position ${nextPos}: ${cardData.text}`);
           const prevPos = this.playerPositions[this.currentPlayer];
           cardData.effect(this);
           const newPos = this.playerPositions[this.currentPlayer];
           console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
           
-          const displayText = `${cardData.theory}: ${cardData.text}`;
+          const displayText = `You drew card ${cardIndex + 1} of ${this.cardPool.length}: ${cardData.theory}: ${cardData.text}`;
           this.showModal('Action Card', `${displayText}\nYou moved to position ${newPos}!`);
 
           if (newPos !== nextPos) {
@@ -1112,6 +1117,7 @@
           }
           this.card.textContent = displayText;
           this.card.style.display = 'block';
+          this.updateCardStack();
           await this.renderPlayer();
         } catch (error) {
           console.error('Error in drawCardFromDeck:', error.message, error.stack);
