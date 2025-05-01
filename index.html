@@ -215,7 +215,7 @@
         if (chutes[i]) cell.classList.add('chute');
 
         // Add draw-card to all odd-numbered squares
-        if (i % 2 === 1) {
+        if (i % 3 === 0) {
           cell.classList.add('draw-card');
           const cardText = cards[i]?.text || "This is a life event. Make a choice and see what happens.";
           const infoButton = document.createElement('button');
