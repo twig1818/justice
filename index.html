@@ -1,19 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paths of Justice - Web Board Game</title>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      background-color: #f4f4f4;
-    }
-    h1 {
-      font-size: 28px;
-      margin-top: 20px;
-    }
     #board {
       display: grid;
       grid-template-columns: repeat(10, 90px);
@@ -41,26 +27,17 @@
       height: 20px;
       position: absolute;
     }
-    .ladder { background-color: #d4fdd4 !important; }
-    .ladder::after {
-      content: "🟢 Good Choice! Move Up";
-      position: absolute;
-      font-size: 10px;
-      bottom: 2px;
-      left: 2px;
-      color: green;
+    .draw-card {
+      background-color: #d4e3fd !important;
     }
-    .chute { background-color: #fdd4d4 !important; }
-    .chute::after {
-      content: "🔴 Bad Choice! Move Down";
-      position: absolute;
-      font-size: 10px;
-      bottom: 2px;
-      left: 2px;
-      color: red;
+    .ladder {
+      background-color: #d4fdd4 !important;
     }
-    .draw-card { background-color: #d4e3fd !important; position: relative; }
-    .draw-card .info-button {
+    .chute {
+      background-color: #fdd4d4 !important;
+    }
+  $1
+    .info-button {
       margin-top: 4px;
       background: none;
       border: none;
@@ -87,85 +64,10 @@
       visibility: visible;
       opacity: 1;
     }
-    .start { background-color: #a8e6ff !important; font-weight: bold; }
-    .end { background-color: #b9fbc0 !important; font-weight: bold; }
-    .card {
-      margin: 20px auto;
-      padding: 10px;
-      border: 1px solid #333;
-      background: #fff;
-      max-width: 400px;
-      font-size: 14px;
-    }
-    button {
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    .player-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      position: relative;
-    }
-    .info-tooltip {
-      position: relative;
-      display: inline-block;
-    }
-    .info-button {
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      background: none;
-    }
-  </style>
 </head>
 <body>
   <h1>Paths of Justice</h1>
-  <div style="display: flex; justify-content: center; align-items: flex-start; gap: 40px;">
-    <div id="playerSelection" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
-      <h3>Players</h3>
-      <div class="player-row">
-        <button onclick="joinGame(0)" style="background-color: gold;">Join as Jaylen 🟡</button>
-        <div class="info-tooltip">
-          <button class="info-button">ℹ️</button>
-          <div class="tooltip-content">
-            Jaylen – He’s trying to do the right thing but life keeps throwing him curveballs. He might make risky choices just to survive. (Strain Theory)
-          </div>
-        </div>
-      </div>
-      <div class="player-row">
-        <button onclick="joinGame(1)" style="background-color: red; color: white;">Join as Samantha 🔴</button>
-        <div class="info-tooltip">
-          <button class="info-button">ℹ️</button>
-          <div class="tooltip-content">
-            Samantha – One mistake and now everyone treats her like a criminal. That kind of label sticks and it’s messing with her future. (Labeling Theory)
-          </div>
-        </div>
-      </div>
-      <div class="player-row">
-        <button onclick="joinGame(2)" style="background-color: blue; color: white;">Join as Marcus 🔵</button>
-        <div class="info-tooltip">
-          <button class="info-button">ℹ️</button>
-          <div class="tooltip-content">
-            Marcus – All his friends are doing it, and that’s how he’s learning what’s “normal.” He’s picking up habits from the people around him. (Social Learning Theory)
-          </div>
-        </div>
-      </div>
-      <div class="player-row">
-        <button onclick="joinGame(3)" style="background-color: green; color: white;">Join as Elena 🟢</button>
-        <div class="info-tooltip">
-          <button class="info-button">ℹ️</button>
-          <div class="tooltip-content">
-            Elena – She sees how unfair the system is, especially for people who look like her. She wants change but faces constant obstacles. (Conflict Theory)
-          </div>
-        </div>
-      </div>
-      <button onclick="resetGame()">Start Over</button>
-    </div>
-    <div>
-      <div id="board"></div>
-    </div>
-  </div>
+  <div id="board"></div>
   <div style="margin-top: 20px;">
     <p>Player position: <span id="position">1</span></p>
     <p id="turnDisplay">🎯 Player 1's turn</p>
@@ -174,179 +76,172 @@
     <button onclick="movePlayer()">Move Player</button>
     <div class="card" id="card" style="display:none;"></div>
   </div>
-  <script>
-    const goodSound = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
-    const badSound = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
-    window.onload = function () {
-      const board = document.getElementById('board');
-      const positionDisplay = document.getElementById('position');
-      const card = document.getElementById('card');
-      let playerPositions = [1, 1, 1, 1];
-      let currentPlayer = 0;
-      let pendingRoll = null;
-      let activePlayers = [false, false, false, false];
-      const playerColors = ['gold', 'red', 'blue', 'green'];
-      const ladders = { 4: 18, 11: 26, 29: 39 };
-      const chutes = { 22: 11, 36: 17, 45: 31 };
-      const cards = {
-        6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
-        10: { text: "People start calling you a troublemaker. You lose motivation. Go back 3 spaces.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } },
-        15: { text: "You meet someone who really believes in you. Move ahead 2 spaces.", effect: function () { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 2); } },
-        19: { text: "You got profiled by the police for no reason. Go back to space 10.", effect: function () { playerPositions[this.playerIndex] = 10; } },
-        23: { text: "You do some community service and gain confidence. Move ahead 1 space.", effect: function () { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 1); } },
-        28: { text: "Your family hits a rough patch. You're distracted. Move back 2.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 2); } },
-        33: { text: "You're surrounded by bad influences. You slip up. Move back 1.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 1); } },
-        37: { text: "Your wealthy family gets you out of trouble. Move ahead 4.", effect: function () { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 4); } },
-        42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function () { playerPositions[this.playerIndex] = Math.min(50, playerPositions[this.playerIndex] + 3); } },
-        48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function () { playerPositions[this.playerIndex] = Math.max(1, playerPositions[this.playerIndex] - 3); } }
-      };
-      for (let i = 1; i <= 50; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.id = 'cell-' + i;
-        if (i === 1) {
-          cell.classList.add('start');
-          cell.innerHTML = `<div>1<br>Start Your Future</div>`;
-        } else if (i === 50) {
-          cell.classList.add('end');
-          cell.innerHTML = `<div>50<br>You Made the Right Choices</div>`;
-        } else {
-          cell.innerHTML = `<div>${i}</div>`;
-        }
-        if (ladders[i]) cell.classList.add('ladder');
-        if (chutes[i]) cell.classList.add('chute');
 
-        // Add draw-card to all odd-numbered squares
-        if (i % 3 === 0) {
-  cell.classList.add('draw-card');
+<script>
+  const goodSound = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
+  const badSound = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
 
-  const infoButton = document.createElement('button');
-  infoButton.className = 'info-button';
-  infoButton.textContent = 'ℹ️';
+  window.onload = function () {
+    const board = document.getElementById('board');
+    const positionDisplay = document.getElementById('position');
+    const card = document.getElementById('card');
 
-  const tooltip = document.createElement('div');
-  tooltip.className = 'tooltip-content';
-  tooltip.textContent = 'This is a life event. Draw a card and see what happens.';
+    let playerPositions = [1, 1, 1, 1];
+    let currentPlayer = 0;
+    let pendingRoll = null;
+    let activePlayers = [false, false, false, false];
+    const playerColors = ['gold', 'red', 'blue', 'green'];
 
-  const wrapper = document.createElement('div');
-  wrapper.className = 'info-tooltip';
-  wrapper.appendChild(infoButton);
-  wrapper.appendChild(tooltip);
+    const ladders = { 4: 18, 11: 26, 29: 39 };
+    const chutes = { 22: 11, 36: 17, 45: 31 };
 
-  infoButton.onclick = (e) => {
-    e.stopPropagation();
+    function movePlayerBy(amount) {
+      let newPos = playerPositions[currentPlayer] + amount;
+      newPos = Math.max(1, Math.min(50, newPos));
+      playerPositions[currentPlayer] = newPos;
+      positionDisplay.textContent = newPos;
+      renderPlayer();
+      if (amount > 0) goodSound.play();
+      if (amount < 0) badSound.play();
+    }
 
-    const options = [
-      { text: 'You found a job training program. Move ahead 2 spaces.', effect: () => movePlayerBy(2) },
-      { text: 'You got caught with a bad crowd. Go back 1 space.', effect: () => movePlayerBy(-1) },
-      { text: 'A mentor helped you stay focused. Move ahead 1 space.', effect: () => movePlayerBy(1) }
-    ];
+    for (let i = 1; i <= 50; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.id = 'cell-' + i;
 
-    const choice = options[Math.floor(Math.random() * options.length)];
-    tooltip.textContent = choice.text;
-    tooltip.style.visibility = tooltip.style.visibility === 'visible' ? 'hidden' : 'visible';
-    tooltip.style.opacity = tooltip.style.opacity === '1' ? '0' : '1';
-    choice.effect();
-  };
-
-  cell.appendChild(wrapper);
-}
-
-board.appendChild(cell);
-}
-
-        board.appendChild(cell);
+      if (i === 1) {
+        cell.classList.add('start');
+        cell.innerHTML = `<div>1<br>Start Your Future</div>`;
+      } else if (i === 50) {
+        cell.classList.add('end');
+        cell.innerHTML = `<div>50<br>You Made the Right Choices</div>`;
+      } else {
+        cell.innerHTML = `<div>${i}</div>`;
       }
-      function renderPlayer() {
-        document.querySelectorAll('.player').forEach(p => p.remove());
-        playerPositions.forEach((pos, index) => {
-          if (activePlayers[index]) {
-            const currentCell = document.getElementById('cell-' + pos);
-            const token = document.createElement('div');
-            token.className = 'player';
-            token.style.backgroundColor = playerColors[index];
-            token.title = 'Player ' + (index + 1);
-            currentCell.appendChild(token);
-          }
-        });
-      }
-      function joinGame(playerIndex) {
-        if (activePlayers[playerIndex]) {
-          alert('Player ' + (playerIndex + 1) + ' has already joined.');
-          return;
-        }
-        activePlayers[playerIndex] = true;
-        alert('Player ' + (playerIndex + 1) + ' joined the game!');
-        renderPlayer();
 
-function movePlayerBy(amount) {
-  let newPos = playerPositions[currentPlayer] + amount;
-  newPos = Math.max(1, Math.min(50, newPos));
-  playerPositions[currentPlayer] = newPos;
-  positionDisplay.textContent = newPos;
-  renderPlayer();
-  if (amount > 0) {
-    goodSound.play();
-  } else if (amount < 0) {
-    badSound.play();
-  }
-}
+      if (ladders[i]) cell.classList.add('ladder');
+      if (chutes[i]) cell.classList.add('chute');
+
+      if (i % 3 === 0) {
+        cell.classList.add('draw-card');
+
+        const infoButton = document.createElement('button');
+        infoButton.className = 'info-button';
+        infoButton.textContent = 'ℹ️';
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip-content';
+        tooltip.textContent = 'This is a life event. Draw a card and see what happens.';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'info-tooltip';
+        wrapper.appendChild(infoButton);
+        wrapper.appendChild(tooltip);
+
+        infoButton.onclick = (e) => {
+          e.stopPropagation();
+          const options = [
+            { text: 'You found a job training program. Move ahead 2 spaces.', effect: () => movePlayerBy(2) },
+            { text: 'You got caught with a bad crowd. Go back 1 space.', effect: () => movePlayerBy(-1) },
+            { text: 'A mentor helped you stay focused. Move ahead 1 space.', effect: () => movePlayerBy(1) }
+          ];
+          const choice = options[Math.floor(Math.random() * options.length)];
+          tooltip.textContent = choice.text;
+          tooltip.style.visibility = tooltip.style.visibility === 'visible' ? 'hidden' : 'visible';
+          tooltip.style.opacity = tooltip.style.opacity === '1' ? '0' : '1';
+          choice.effect();
+        };
+
+        cell.appendChild(wrapper);
       }
-      function rollDice() {
-        card.style.display = 'none';
-        if (!activePlayers.includes(true)) {
-          alert('No players have joined the game!');
-          return;
+
+      board.appendChild(cell);
+    }
+
+    function renderPlayer() {
+      document.querySelectorAll('.player').forEach(p => p.remove());
+      playerPositions.forEach((pos, index) => {
+        if (activePlayers[index]) {
+          const currentCell = document.getElementById('cell-' + pos);
+          const token = document.createElement('div');
+          token.className = 'player';
+          token.style.backgroundColor = playerColors[index];
+          token.title = 'Player ' + (index + 1);
+          currentCell.appendChild(token);
         }
-        const roll = Math.floor(Math.random() * 6) + 1;
-        pendingRoll = roll;
-        document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
+      });
+    }
+
+    function joinGame(playerIndex) {
+      if (activePlayers[playerIndex]) {
+        alert('Player ' + (playerIndex + 1) + ' has already joined.');
+        return;
       }
-      function movePlayer() {
-        if (pendingRoll === null) {
-          alert('Please roll the dice first!');
-          return;
-        }
-        let currentPos = playerPositions[currentPlayer];
-        let nextPos = currentPos + pendingRoll;
-        if (nextPos > 50) nextPos = 50;
-        if (ladders[nextPos]) {
-          nextPos = ladders[nextPos];
-          alert('🟢 You climbed a ladder!');
-        } else if (chutes[nextPos]) {
-          nextPos = chutes[nextPos];
-          alert('🔴 You slid down a chute!');
-        }
-        playerPositions[currentPlayer] = nextPos;
-        if (cards[nextPos]) {
-          const cardData = cards[nextPos];
-          cardData.effect = cardData.effect.bind({ playerIndex: currentPlayer });
-          cardData.effect();
-        }
-        positionDisplay.textContent = playerPositions[currentPlayer];
-        renderPlayer();
-        pendingRoll = null;
-        do {
-          currentPlayer = (currentPlayer + 1) % 4;
-        } while (!activePlayers[currentPlayer]);
-        document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
-      }
-      function resetGame() {
-        playerPositions = [1, 1, 1, 1];
-        currentPlayer = 0;
-        activePlayers = [false, false, false, false];
-        renderPlayer();
-        positionDisplay.textContent = 1;
-        card.style.display = 'none';
-        document.getElementById('diceResult').textContent = '';
-        document.getElementById('turnDisplay').textContent = '🎯 Player 1\'s turn';
-      }
-      window.joinGame = joinGame;
-      window.rollDice = rollDice;
-      window.movePlayer = movePlayer;
-      window.resetGame = resetGame;
+      activePlayers[playerIndex] = true;
+      alert('Player ' + (playerIndex + 1) + ' joined the game!');
       renderPlayer();
     }
-  </script>
+
+    function rollDice() {
+      card.style.display = 'none';
+      if (!activePlayers.includes(true)) {
+        alert('No players have joined the game!');
+        return;
+      }
+      const roll = Math.floor(Math.random() * 6) + 1;
+      pendingRoll = roll;
+      document.getElementById('diceResult').textContent = '🎲 Rolled: ' + roll;
+    }
+
+    function movePlayer() {
+      if (pendingRoll === null) {
+        alert('Please roll the dice first!');
+        return;
+      }
+
+      let currentPos = playerPositions[currentPlayer];
+      let nextPos = currentPos + pendingRoll;
+      if (nextPos > 50) nextPos = 50;
+
+      if (ladders[nextPos]) {
+        nextPos = ladders[nextPos];
+        alert('🟢 You climbed a ladder!');
+      } else if (chutes[nextPos]) {
+        nextPos = chutes[nextPos];
+        alert('🔴 You slid down a chute!');
+      }
+
+      playerPositions[currentPlayer] = nextPos;
+      positionDisplay.textContent = playerPositions[currentPlayer];
+      renderPlayer();
+
+      pendingRoll = null;
+
+      do {
+        currentPlayer = (currentPlayer + 1) % 4;
+      } while (!activePlayers[currentPlayer]);
+
+      document.getElementById('turnDisplay').textContent = '🎯 Player ' + (currentPlayer + 1) + "'s turn";
+    }
+
+    function resetGame() {
+      playerPositions = [1, 1, 1, 1];
+      currentPlayer = 0;
+      activePlayers = [false, false, false, false];
+      renderPlayer();
+      positionDisplay.textContent = 1;
+      card.style.display = 'none';
+      document.getElementById('diceResult').textContent = '';
+      document.getElementById('turnDisplay').textContent = '🎯 Player 1\'s turn';
+    }
+
+    window.joinGame = joinGame;
+    window.rollDice = rollDice;
+    window.movePlayer = movePlayer;
+    window.resetGame = resetGame;
+
+    renderPlayer();
+  }
+</script>
 </body>
-</html>
