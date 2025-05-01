@@ -325,13 +325,29 @@
 
           console.log(`Animating Player ${playerIndex + 1} from ${fromPos} to ${toPos}, dx=${dx}, dy=${dy}, fromOffset=${fromOffset}, toOffset=${toOffset}`);
 
+          // Move token to the new cell first to ensure it’s in the correct DOM position
+          this.cells[toPos].appendChild(token);
+
+          // Apply the animation
           token.style.transform = `translate(${dx - 50 + fromOffset}%, ${dy - 50}%)`;
-          token.addEventListener('transitionend', () => {
-            this.cells[toPos].appendChild(token);
+
+          const onTransitionEnd = () => {
+            token.removeEventListener('transitionend', onTransitionEnd);
+            clearTimeout(timeout);
             token.style.transform = `translate(-50%, -50%) translateX(${toOffset}px)`;
             console.log(`Animation completed for Player ${playerIndex + 1} to position ${toPos}`);
             resolve();
-          }, { once: true });
+          };
+
+          // Fallback timeout to ensure the Promise resolves
+          const timeout = setTimeout(() => {
+            token.removeEventListener('transitionend', onTransitionEnd);
+            token.style.transform = `translate(-50%, -50%) translateX(${toOffset}px)`;
+            console.warn(`Animation timeout for Player ${playerIndex + 1}, forcing completion to position ${toPos}`);
+            resolve();
+          }, 1000); // 1 second timeout
+
+          token.addEventListener('transitionend', onTransitionEnd, { once: true });
         });
       }
 
@@ -443,14 +459,16 @@
           if (this.cards[nextPos]) {
             const cardData = this.cards[nextPos];
             console.log(`Card effect at position ${nextPos}: ${cardData.text}`);
-            // Pass the game instance to the effect function
             cardData.effect(this);
             const newPos = this.playerPositions[this.currentPlayer];
             console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
             if (newPos !== nextPos) {
               await this.animateToken(this.currentPlayer, nextPos, newPos);
-              this.playerPositions[this.currentPlayer] = newPos; // Ensure position is updated
-              await this.renderPlayer(); // Force render after card effect movement
+              this.playerPositions[this.currentPlayer] = newPos;
+              await this.renderPlayer();
+            } else {
+              console.log(`No position change after card effect, proceeding`);
+              await new Promise(resolve => setTimeout(resolve, 300));
             }
             this.card.textContent = cardData.text;
             this.card.style.display = 'block';
