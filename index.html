@@ -227,16 +227,16 @@
         this.ladders = { 4: 18, 11: 26, 29: 39 };
         this.chutes = { 22: 11, 36: 17, 45: 31 };
         this.cards = {
-          6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function () { this.playerPositions[this.playerIndex] = Math.max(1, this.playerPositions[this.playerIndex] - 1); } },
-          10: { text: "People start calling you a troublemaker. You lose motivation. Go back 3 spaces.", effect: function () { this.playerPositions[this.playerIndex] = Math.max(1, this.playerPositions[this.playerIndex] - 3); } },
-          15: { text: "You meet someone who really believes in you. Move ahead 2 spaces.", effect: function () { this.playerPositions[this.playerIndex] = Math.min(50, this.playerPositions[this.playerIndex] + 2); } },
-          19: { text: "You got profiled by the police for no reason. Go back to space 10.", effect: function () { this.playerPositions[this.playerIndex] = 10; } },
-          23: { text: "You do some community service and gain confidence. Move ahead 1 space.", effect: function () { this.playerPositions[this.playerIndex] = Math.min(50, this.playerPositions[this.playerIndex] + 1); } },
-          28: { text: "Your family hits a rough patch. You're distracted. Move back 2.", effect: function () { this.playerPositions[this.playerIndex] = Math.max(1, this.playerPositions[this.playerIndex] - 2); } },
-          33: { text: "You're surrounded by bad influences. You slip up. Move back 1.", effect: function () { this.playerPositions[this.playerIndex] = Math.max(1, this.playerPositions[this.playerIndex] - 1); } },
-          37: { text: "Your wealthy family gets you out of trouble. Move ahead 4.", effect: function () { this.playerPositions[this.playerIndex] = Math.min(50, this.playerPositions[this.playerIndex] + 4); } },
-          42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function () { this.playerPositions[this.playerIndex] = Math.min(50, this.playerPositions[this.playerIndex] + 3); } },
-          48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function () { this.playerPositions[this.playerIndex] = Math.max(1, this.playerPositions[this.playerIndex] - 3); } }
+          6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 1); } },
+          10: { text: "People start calling you a troublemaker. You lose motivation. Go back 3 spaces.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
+          15: { text: "You meet someone who really believes in you. Move ahead 2 spaces.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
+          19: { text: "You got profiled by the police for no reason. Go back to space 10.", effect: function (game) { game.playerPositions[game.currentPlayer] = 10; } },
+          23: { text: "You do some community service and gain confidence. Move ahead 1 space.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 1); } },
+          28: { text: "Your family hits a rough patch. You're distracted. Move back 2.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
+          33: { text: "You're surrounded by bad influences. You slip up. Move back 1.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 1); } },
+          37: { text: "Your wealthy family gets you out of trouble. Move ahead 4.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
+          42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
+          48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         };
       }
 
@@ -310,6 +310,7 @@
         return new Promise(resolve => {
           const token = this.playerTokens[playerIndex];
           if (!token || fromPos === toPos) {
+            console.log(`Animation skipped for Player ${playerIndex + 1}: fromPos=${fromPos}, toPos=${toPos}`);
             resolve();
             return;
           }
@@ -322,10 +323,13 @@
           const fromOffset = this.getTokenOffset(playerIndex, fromPos);
           const toOffset = this.getTokenOffset(playerIndex, toPos);
 
+          console.log(`Animating Player ${playerIndex + 1} from ${fromPos} to ${toPos}, dx=${dx}, dy=${dy}, fromOffset=${fromOffset}, toOffset=${toOffset}`);
+
           token.style.transform = `translate(${dx - 50 + fromOffset}%, ${dy - 50}%)`;
           token.addEventListener('transitionend', () => {
             this.cells[toPos].appendChild(token);
             token.style.transform = `translate(-50%, -50%) translateX(${toOffset}px)`;
+            console.log(`Animation completed for Player ${playerIndex + 1} to position ${toPos}`);
             resolve();
           }, { once: true });
         });
@@ -413,6 +417,8 @@
 
         this.moveButton.disabled = true;
         try {
+          console.log(`Moving Player ${this.currentPlayer + 1}, current position: ${this.playerPositions[this.currentPlayer]}, roll: ${this.pendingRoll}`);
+          
           const currentPos = this.playerPositions[this.currentPlayer];
           let nextPos = Math.min(50, currentPos + this.pendingRoll);
 
@@ -436,15 +442,15 @@
 
           if (this.cards[nextPos]) {
             const cardData = this.cards[nextPos];
-            cardData.effect = cardData.effect.bind({ playerIndex: this.currentPlayer, playerPositions: this.playerPositions });
-            const prevPos = this.playerPositions[this.currentPlayer];
-            cardData.effect();
+            console.log(`Card effect at position ${nextPos}: ${cardData.text}`);
+            // Pass the game instance to the effect function
+            cardData.effect(this);
             const newPos = this.playerPositions[this.currentPlayer];
-            if (newPos !== prevPos) {
-              await this.animateToken(this.currentPlayer, prevPos, newPos);
-            } else {
-              // Ensure the game doesn't hang if no movement occurs
-              await new Promise(resolve => setTimeout(resolve, 300));
+            console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
+            if (newPos !== nextPos) {
+              await this.animateToken(this.currentPlayer, nextPos, newPos);
+              this.playerPositions[this.currentPlayer] = newPos; // Ensure position is updated
+              await this.renderPlayer(); // Force render after card effect movement
             }
             this.card.textContent = cardData.text;
             this.card.style.display = 'block';
