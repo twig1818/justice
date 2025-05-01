@@ -175,6 +175,8 @@
     <div class="card" id="card" style="display:none;"></div>
   </div>
   <script>
+    const goodSound = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
+    const badSound = new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3');
     window.onload = function () {
       const board = document.getElementById('board');
       const positionDisplay = document.getElementById('position');
@@ -216,23 +218,39 @@
 
         // Add draw-card to all odd-numbered squares
         if (i % 3 === 0) {
-          cell.classList.add('draw-card');
-          const cardText = cards[i]?.text || "This is a life event. Make a choice and see what happens.";
-          const infoButton = document.createElement('button');
-          infoButton.className = 'info-button';
-          infoButton.textContent = 'ℹ️';
-          const tooltip = document.createElement('div');
-          tooltip.className = 'tooltip-content';
-          tooltip.textContent = cardText;
-          const wrapper = document.createElement('div');
-          wrapper.className = 'info-tooltip';
-          wrapper.appendChild(infoButton);
-          wrapper.appendChild(tooltip);
-          infoButton.onclick = (e) => {
-            e.stopPropagation();
-            tooltip.style.visibility = tooltip.style.visibility === 'visible' ? 'hidden' : 'visible';
-            tooltip.style.opacity = tooltip.style.opacity === '1' ? '0' : '1';
-          };
+  cell.classList.add('draw-card');
+
+  const infoButton = document.createElement('button');
+  infoButton.className = 'info-button';
+  infoButton.textContent = 'ℹ️';
+
+  const tooltip = document.createElement('div');
+  tooltip.className = 'tooltip-content';
+  tooltip.textContent = 'This is a life event. Draw a card and see what happens.';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'info-tooltip';
+  wrapper.appendChild(infoButton);
+  wrapper.appendChild(tooltip);
+
+  infoButton.onclick = (e) => {
+    e.stopPropagation();
+
+    const options = [
+      { text: 'You found a job training program. Move ahead 2 spaces.', effect: () => movePlayerBy(2) },
+      { text: 'You got caught with a bad crowd. Go back 1 space.', effect: () => movePlayerBy(-1) },
+      { text: 'A mentor helped you stay focused. Move ahead 1 space.', effect: () => movePlayerBy(1) }
+    ];
+
+    const choice = options[Math.floor(Math.random() * options.length)];
+    tooltip.textContent = choice.text;
+    tooltip.style.visibility = tooltip.style.visibility === 'visible' ? 'hidden' : 'visible';
+    tooltip.style.opacity = tooltip.style.opacity === '1' ? '0' : '1';
+    choice.effect();
+  };
+
+  cell.appendChild(wrapper);
+};
           cell.appendChild(wrapper);
         }
 
@@ -259,6 +277,19 @@
         activePlayers[playerIndex] = true;
         alert('Player ' + (playerIndex + 1) + ' joined the game!');
         renderPlayer();
+
+function movePlayerBy(amount) {
+  let newPos = playerPositions[currentPlayer] + amount;
+  newPos = Math.max(1, Math.min(50, newPos));
+  playerPositions[currentPlayer] = newPos;
+  positionDisplay.textContent = newPos;
+  renderPlayer();
+  if (amount > 0) {
+    goodSound.play();
+  } else if (amount < 0) {
+    badSound.play();
+  }
+}
       }
       function rollDice() {
         card.style.display = 'none';
