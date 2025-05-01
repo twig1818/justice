@@ -220,6 +220,59 @@
       background-color: #f44336;
       color: white;
     }
+    /* Dice Styling */
+    #diceDisplay {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    .dice {
+      width: 100px;
+      height: 100px;
+      background-color: white;
+      border: 2px solid black;
+      border-radius: 10px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .dot {
+      width: 20px;
+      height: 20px;
+      background-color: black;
+      border-radius: 50%;
+      place-self: center;
+      display: none;
+    }
+    /* Dice face configurations */
+    .dice-1 .dot:nth-child(1) { display: block; grid-column: 2; grid-row: 2; }
+    .dice-2 .dot:nth-child(1) { display: block; grid-column: 1; grid-row: 1; }
+    .dice-2 .dot:nth-child(2) { display: block; grid-column: 3; grid-row: 3; }
+    .dice-3 .dot:nth-child(1) { display: block; grid-column: 1; grid-row: 1; }
+    .dice-3 .dot:nth-child(2) { display: block; grid-column: 2; grid-row: 2; }
+    .dice-3 .dot:nth-child(3) { display: block; grid-column: 3; grid-row: 3; }
+    .dice-4 .dot:nth-child(1) { display: block; grid-column: 1; grid-row: 1; }
+    .dice-4 .dot:nth-child(2) { display: block; grid-column: 1; grid-row: 3; }
+    .dice-4 .dot:nth-child(3) { display: block; grid-column: 3; grid-row: 1; }
+    .dice-4 .dot:nth-child(4) { display: block; grid-column: 3; grid-row: 3; }
+    .dice-5 .dot:nth-child(1) { display: block; grid-column: 1; grid-row: 1; }
+    .dice-5 .dot:nth-child(2) { display: block; grid-column: 1; grid-row: 3; }
+    .dice-5 .dot:nth-child(3) { display: block; grid-column: 3; grid-row: 1; }
+    .dice-5 .dot:nth-child(4) { display: block; grid-column: 3; grid-row: 3; }
+    .dice-5 .dot:nth-child(5) { display: block; grid-column: 2; grid-row: 2; }
+    .dice-6 .dot:nth-child(1) { display: block; grid-column: 1; grid-row: 1; }
+    .dice-6 .dot:nth-child(2) { display: block; grid-column: 1; grid-row: 2; }
+    .dice-6 .dot:nth-child(3) { display: block; grid-column: 1; grid-row: 3; }
+    .dice-6 .dot:nth-child(4) { display: block; grid-column: 3; grid-row: 1; }
+    .dice-6 .dot:nth-child(5) { display: block; grid-column: 3; grid-row: 2; }
+    .dice-6 .dot:nth-child(6) { display: block; grid-column: 3; grid-row: 3; }
     @media (max-width: 600px) {
       #board {
         grid-template-columns: repeat(10, 60px);
@@ -265,6 +318,15 @@
       .draw-card .info-button {
         font-size: 8px;
         padding: 1px 2px;
+      }
+      .dice {
+        width: 60px;
+        height: 60px;
+        padding: 5px;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
       }
     }
   </style>
@@ -321,6 +383,17 @@
       <p id="positionsDisplay">Player positions: <span id="positions">No players</span></p>
     </div>
   </div>
+  <!-- Add dice display element -->
+  <div id="diceDisplay">
+    <div class="dice">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
   <div style="margin-top: 20px;">
     <div class="card" id="card" style="display:none;" role="alert"></div>
   </div>
@@ -357,6 +430,7 @@
         this.positionsDisplay = document.getElementById('positions');
         this.turnDisplay = document.getElementById('turnDisplay');
         this.diceResult = document.getElementById('diceResult');
+        this.diceDisplay = document.getElementById('diceDisplay');
         this.card = document.getElementById('card');
         this.rollButton = document.querySelector('button[onclick="game.rollDice()"]');
         this.cells = {};
@@ -394,6 +468,7 @@
         ];
         this.cardCells = [6, 10, 15, 19, 23, 28, 33, 37, 48];
         this.currentJoinIndex = null;
+        this.isProcessingMove = false;
         this.initModalElements();
         this.setupEventListeners();
       }
@@ -457,6 +532,9 @@
         console.log('Initializing board...');
         try {
           document.getElementById('loading').style.display = 'none';
+          this.board.innerHTML = '';
+          this.cells = {};
+
           for (let i = 1; i <= 50; i++) {
             console.log(`Creating cell ${i}`);
             const cell = document.createElement('div');
@@ -466,6 +544,7 @@
             cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
+            cell.removeEventListener('click', this.handleCellClickBound);
             cell.addEventListener('click', () => this.handleCellClick(i));
             this.cells[i] = cell;
 
@@ -659,16 +738,43 @@
         }
       }
 
-      rollDice() {
+      // Show the dice graphic
+      showDice(roll) {
+        const diceElement = this.diceDisplay.querySelector('.dice');
+        // Remove previous dice face classes
+        diceElement.className = 'dice';
+        // Add the appropriate class for the rolled number
+        diceElement.classList.add(`dice-${roll}`);
+        // Show the dice with animation
+        this.diceDisplay.style.display = 'block';
+        setTimeout(() => {
+          this.diceDisplay.style.opacity = '1';
+        }, 10);
+      }
+
+      // Hide the dice graphic
+      hideDice() {
+        this.diceDisplay.style.opacity = '0';
+        setTimeout(() => {
+          this.diceDisplay.style.display = 'none';
+        }, 500);
+      }
+
+      async rollDice() {
         try {
           if (!this.activePlayers.includes(true)) {
             this.showModal('Notice', 'No players have joined the game!');
             return;
           }
           this.card.style.display = 'none';
+          this.hideDice(); // Hide any previous dice display
           const roll = Math.floor(Math.random() * 6) + 1;
           this.pendingRoll = roll;
-          this.diceResult.textContent = `🎲 Rolled: ${roll}. Click on the highlighted cell to move!`;
+          // Show the dice graphic
+          this.showDice(roll);
+          // Delay showing the message to let the dice animation play
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          this.diceResult.textContent = `Click on the highlighted cell to move!`;
           const currentPos = this.playerPositions[this.currentPlayer];
           this.targetPosition = Math.min(50, currentPos + roll);
           this.highlightTargetCell(this.targetPosition);
@@ -682,6 +788,11 @@
       async handleCellClick(position) {
         console.log(`handleCellClick called with position: ${position}, Pending Roll: ${this.pendingRoll}, Target Position: ${this.targetPosition}`);
         
+        if (this.isProcessingMove) {
+          console.log('Move is already being processed, ignoring click');
+          return;
+        }
+
         if (this.pendingRoll === null) {
           console.log('Pending roll is null, showing "Please roll the dice first!" message');
           this.showModal('Notice', 'Please roll the dice first!');
@@ -694,6 +805,7 @@
           return;
         }
 
+        this.isProcessingMove = true;
         try {
           console.log(`Player ${this.currentPlayer + 1} clicked cell ${position}`);
           
@@ -768,6 +880,7 @@
           await this.renderPlayer();
           this.pendingRoll = null;
           this.targetPosition = null;
+          this.hideDice(); // Hide the dice after the move
           this.clearHighlights();
           this.diceResult.textContent = `🎲 Rolled: --`;
           console.log('After move, reset Pending Roll and Target Position');
@@ -775,6 +888,8 @@
         } catch (error) {
           console.error('Error in handleCellClick:', error.message, error.stack);
           this.showModal('Error', 'An error occurred during the move. Please reset the game.');
+        } finally {
+          this.isProcessingMove = false;
         }
       }
 
@@ -806,6 +921,7 @@
           this.playerTokens.forEach(token => token?.remove());
           this.playerTokens = [null, null, null, null];
           this.clearHighlights();
+          this.hideDice(); // Hide the dice on reset
           this.renderPlayer();
           this.card.style.display = 'none';
           this.diceResult.textContent = '';
