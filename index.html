@@ -230,6 +230,61 @@
       background-color: #f44336;
       color: white;
     }
+    /* New styles for victory pop-up */
+    #victoryModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+    #victoryModalContent {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      border: 3px solid #4CAF50;
+    }
+    #victoryModalContent h2 {
+      margin: 0 0 20px 0;
+      font-size: 28px;
+      color: #4CAF50;
+      text-transform: uppercase;
+    }
+    #victoryModalContent p {
+      font-size: 18px;
+      margin: 0 0 20px 0;
+      line-height: 1.5;
+      color: #333;
+    }
+    #victoryModalContent img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .victory-button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .victory-button:hover {
+      background-color: #45a049;
+    }
     #diceDisplay {
       display: none;
       position: fixed;
@@ -341,6 +396,23 @@
         width: 12px;
         height: 12px;
       }
+      #victoryModalContent {
+        padding: 20px;
+        max-width: 90%;
+      }
+      #victoryModalContent h2 {
+        font-size: 20px;
+      }
+      #victoryModalContent p {
+        font-size: 14px;
+      }
+      #victoryModalContent img {
+        max-width: 200px;
+      }
+      .victory-button {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
@@ -416,6 +488,15 @@
       <div class="modal-buttons" id="gameModalButtons"></div>
     </div>
   </div>
+  <!-- New victory modal -->
+  <div id="victoryModal" role="dialog" aria-labelledby="victoryModalTitle" aria-modal="true">
+    <div id="victoryModalContent">
+      <h2 id="victoryModalTitle"></h2>
+      <p id="victoryModalDescription"></p>
+      <img src="https://media.giphy.com/media/xUOwFUnsoHbFLn16eY/giphy.gif" alt="Continue Your Journey GIF">
+      <button class="victory-button" onclick="game.closeVictoryModal()" aria-label="Continue">Continue</button>
+    </div>
+  </div>
   <script>
     class Game {
       constructor() {
@@ -482,7 +563,6 @@
           { theory: "Conflict Theory", text: "A community leader helps you navigate systemic barriers. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Conflict Theory", text: "Systemic inequality blocks your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Conflict Theory", text: "Unfair treatment by authorities sets you back. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
-          // New cards added below
           { theory: "Strain Theory", text: "You join a community program that helps you cope with life’s pressures, giving you a major boost toward your goals. Move forward 6 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 6); } },
           { theory: "Labeling Theory", text: "A past label resurfaces, causing authorities to unfairly target you again. Move back 5 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 5); } },
           { theory: "Conflict Theory", text: "You lead a movement against systemic inequality, gaining widespread support and momentum. Move forward 7 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 7); } }
@@ -501,7 +581,11 @@
         this.gameModalTitle = document.getElementById('gameModalTitle');
         this.gameModalDescription = document.getElementById('gameModalDescription');
         this.gameModalButtons = document.getElementById('gameModalButtons');
-        if (!this.gameModal || !this.gameModalTitle || !this.gameModalDescription || !this.gameModalButtons) {
+        this.victoryModal = document.getElementById('victoryModal');
+        this.victoryModalTitle = document.getElementById('victoryModalTitle');
+        this.victoryModalDescription = document.getElementById('victoryModalDescription');
+        if (!this.gameModal || !this.gameModalTitle || !this.gameModalDescription || !this.gameModalButtons ||
+            !this.victoryModal || !this.victoryModalTitle || !this.victoryModalDescription) {
           console.error('Modal elements not found!');
           document.getElementById('loading').textContent = 'Error: Modal elements not found.';
         }
@@ -513,6 +597,9 @@
             this.gameModal.style.display = 'none';
             this.currentJoinIndex = null;
           }
+          if (e.key === 'Escape' && this.victoryModal && this.victoryModal.style.display === 'flex') {
+            this.closeVictoryModal();
+          }
         });
 
         if (this.gameModal) {
@@ -520,6 +607,14 @@
             if (e.target === this.gameModal) {
               this.gameModal.style.display = 'none';
               this.currentJoinIndex = null;
+            }
+          });
+        }
+
+        if (this.victoryModal) {
+          this.victoryModal.addEventListener('click', (e) => {
+            if (e.target === this.victoryModal) {
+              this.closeVictoryModal();
             }
           });
         }
@@ -550,6 +645,24 @@
         this.gameModalButtons.querySelector('button').focus();
       }
 
+      showVictoryModal(playerName) {
+        if (!this.victoryModal || !this.victoryModalTitle || !this.victoryModalDescription) {
+          console.error('Cannot show victory modal: modal elements not initialized');
+          document.getElementById('loading').textContent = 'Error: Cannot display victory modal.';
+          return;
+        }
+        this.victoryModalTitle.textContent = `${playerName} Wins!`;
+        this.victoryModalDescription.textContent = 'You have won the game, but your journey is up to you. Continue your journey.';
+        this.victoryModal.style.display = 'flex';
+        this.victoryModal.querySelector('.victory-button').focus();
+      }
+
+      closeVictoryModal() {
+        if (this.victoryModal) {
+          this.victoryModal.style.display = 'none';
+        }
+      }
+
       initBoard() {
         console.log('Initializing board...');
         try {
@@ -563,7 +676,6 @@
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
-            // Include trouble slot message in aria-label for accessibility
             const troubleMessage = this.troubleSlots[i] ? `, ${this.troubleSlots[i].message}` : '';
             cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}`);
             cell.tabIndex = 0;
@@ -756,10 +868,7 @@
                   this.activePlayers[playerIndex] = true;
                   this.renderPlayer();
                   this.updateButtonState();
-                  if (this.currentPlayer === playerIndex && !this.activePlayers[this.currentPlayer]) {
-                    this.nextTurn();
-                  }
-                  this.gameModal.style.display = 'none';
+                  if (this.currentPlayer === playerIndex && !this.gameModal.style.display = 'none';
                   this.currentJoinIndex = null;
                 }
               }
@@ -900,17 +1009,18 @@
           if (this.troubleSlots[nextPos]) {
             const troubleData = this.troubleSlots[nextPos];
             const troublePos = troubleData.to;
-            this.showModal('Trouble!', `${tr  troubleData.message}\nMoving to position ${troublePos}!`);
+            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
             await this.animateToken(this.currentPlayer, nextPos, troublePos);
             nextPos = troublePos;
             this.playerPositions[this.currentPlayer] = nextPos;
           }
 
           if (this.playerPositions[this.currentPlayer] >= 50) {
-            this.showModal('Victory!', `${this.playerNames[this.currentPlayer]} wins!`);
+            this.showVictoryModal(this.playerNames[this.currentPlayer]);
             this.playerTokens[this.currentPlayer].remove();
             this.playerTokens[this.currentPlayer] = null;
             this.activePlayers[this.currentPlayer] = false;
+            await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay to ensure modal displays
             if (!this.activePlayers.includes(true)) {
               this.showModal('Game Over', 'Game Over! All players have finished.', [
                 {
@@ -979,6 +1089,7 @@
           this.turnDisplay.textContent = '🎯 Player 1\'s turn';
           this.updateButtonState();
           this.updateRollButtonLabel();
+          this.closeVictoryModal();
           console.log('Game reset: Pending Roll and Target Position cleared');
         } catch (error) {
           console.error('Error in resetGame:', error.message, error.stack);
