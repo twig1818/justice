@@ -22,7 +22,7 @@
       margin: 20px auto;
       width: max-content;
       position: relative;
-      min-height: 470px; /* Ensure board is visible */
+      min-height: 470px;
       border: 2px solid red; /* Debugging border */
     }
     .cell {
@@ -147,7 +147,6 @@
       font-size: 18px;
       color: #333;
     }
-    /* Modal styles */
     #gameModal {
       display: none;
       position: fixed;
@@ -206,7 +205,7 @@
       #board {
         grid-template-columns: repeat(10, 60px);
         grid-template-rows: repeat(5, 60px);
-        min-height: 310px; /* Adjusted for smaller cells */
+        min-height: 310px;
       }
       .cell {
         width: 60px;
@@ -289,7 +288,7 @@
       <button onclick="game.resetGame()" aria-label="Start over">Start Over</button>
     </div>
     <div>
-      <div id="board" role="grid"></div>
+      <div id="board" role="grid" aria-live="polite"></div>
     </div>
   </div>
   <div style="margin-top: 20px;">
@@ -347,28 +346,47 @@
           42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         };
+        this.currentJoinIndex = null;
+        this.initModalElements();
+        this.setupEventListeners();
+      }
+
+      initModalElements() {
+        console.log('Initializing modal elements...');
         this.gameModal = document.getElementById('gameModal');
         this.gameModalTitle = document.getElementById('gameModalTitle');
         this.gameModalDescription = document.getElementById('gameModalDescription');
         this.gameModalButtons = document.getElementById('gameModalButtons');
-        this.currentJoinIndex = null;
+        if (!this.gameModal || !this.gameModalTitle || !this.gameModalDescription || !this.gameModalButtons) {
+          console.error('Modal elements not found!');
+          document.getElementById('loading').textContent = 'Error: Modal elements not found.';
+        }
+      }
 
+      setupEventListeners() {
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && this.gameModal.style.display === 'flex') {
+          if (e.key === 'Escape' && this.gameModal && this.gameModal.style.display === 'flex') {
             this.gameModal.style.display = 'none';
             this.currentJoinIndex = null;
           }
         });
 
-        this.gameModal.addEventListener('click', (e) => {
-          if (e.target === this.gameModal) {
-            this.gameModal.style.display = 'none';
-            this.currentJoinIndex = null;
-          }
-        });
+        if (this.gameModal) {
+          this.gameModal.addEventListener('click', (e) => {
+            if (e.target === this.gameModal) {
+              this.gameModal.style.display = 'none';
+              this.currentJoinIndex = null;
+            }
+          });
+        }
       }
 
       showModal(title, message, buttons = [{ text: 'OK', class: 'modal-button-ok', onClick: () => this.gameModal.style.display = 'none' }]) {
+        if (!this.gameModal || !this.gameModalTitle || !this.gameModalDescription || !this.gameModalButtons) {
+          console.error('Cannot show modal: modal elements not initialized');
+          document.getElementById('loading').textContent = 'Error: Cannot display modal.';
+          return;
+        }
         this.gameModalTitle.textContent = title;
         this.gameModalDescription.textContent = message;
         this.gameModalButtons.innerHTML = '';
@@ -435,6 +453,7 @@
           }
         } catch (error) {
           console.error('Error in initBoard:', error.message, error.stack);
+          document.getElementById('loading').textContent = 'Error: Failed to initialize the game board.';
           this.showModal('Error', 'Failed to initialize the game board. Please refresh the page.');
         }
       }
@@ -469,7 +488,7 @@
           this.cells[toPos].appendChild(token);
           const offset = this.getTokenOffset(playerIndex, toPos);
           token.style.transform = `translate(-50%, -50%) translateX(${offset}px)`;
-          setTimeout(resolve, 300); // Simplified animation
+          setTimeout(resolve, 300);
         });
       }
 
@@ -632,7 +651,7 @@
 
             if (newPos !== nextPos) {
               await this.animateToken(this.currentPlayer, nextPos, newPos);
-              this.playerPositions[this.currentPlayer] = Inferno newPos;
+              this.playerPositions[this.currentPlayer] = newPos;
               await this.renderPlayer();
             } else {
               console.log(`No position change after card effect, proceeding`);
@@ -726,6 +745,7 @@
           game.updateButtonState();
         } else {
           console.error('Game initialization failed: board element missing');
+          document.getElementById('loading').textContent = 'Error: Board element missing.';
         }
       } catch (error) {
         console.error('Error during initialization:', error.message, error.stack);
