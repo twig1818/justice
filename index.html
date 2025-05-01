@@ -52,18 +52,19 @@
       border: 3px solid yellow !important;
       background-color: rgba(255, 255, 0, 0.3) !important;
     }
-    .ladder { background-color: #d4fdd4 !important; }
-    .ladder::after {
-      content: "Rise Above the System: A Step Toward Justice!";
+    .ladder { background-color: #d4fdd4 !important; position: relative; }
+    .ladder .ladder-label {
       position: absolute;
-      font-size: 10px;
-      bottom: 2px;
+      top: 2px;
       left: 2px;
+      font-size: 10px;
+      font-weight: bold;
       color: green;
       text-align: left;
       width: 80px;
       line-height: 12px;
     }
+    /* Removed the ::after pseudo-element for ladders */
     .chute { background-color: #fdd4d4 !important; position: relative; }
     .chute .chute-label {
       position: absolute;
@@ -76,7 +77,6 @@
       width: 80px;
       line-height: 12px;
     }
-    /* Removed the ::after pseudo-element for chutes */
     .draw-card { background-color: #d4e3fd !important; position: relative; }
     .draw-card .info-button {
       margin-top: 4px;
@@ -106,6 +106,10 @@
       opacity: 1;
     }
     .chute:hover .tooltip-content {
+      visibility: visible;
+      opacity: 1;
+    }
+    .ladder:hover .tooltip-content {
       visibility: visible;
       opacity: 1;
     }
@@ -243,7 +247,7 @@
         font-size: 12px;
         padding: 6px 12px;
       }
-      .chute-label {
+      .chute-label, .ladder-label {
         font-size: 8px;
         width: 50px;
       }
@@ -343,12 +347,17 @@
         this.cells = {};
         this.playerTokens = [null, null, null, null];
         this.cellSize = 94;
-        this.ladders = { 4: 18, 11: 26, 29: 39 };
+        this.ladders = {
+          4: { to: 18, label: "Strain Theory Ladder to 18", message: "🟢 Strain Theory: You found a mentor who helped you overcome life's pressures—climb up!" },
+          11: { to: 26, label: "Labeling Theory Ladder to 26", message: "🟢 Labeling Theory: You worked hard to break free from a negative label and gained support—climb up!" },
+          29: { to: 39, label: "Social Learning Ladder to 39", message: "🟢 Social Learning Theory: You learned positive habits from a role model—climb up!" },
+          42: { to: 48, label: "Conflict Theory Ladder to 48", message: "🟢 Conflict Theory: You advocated for change and gained allies in the system—climb up!" }
+        };
         this.chutes = {
-          25: { to: 14, label: "Strain Theory Chute", message: "🔴 Strain Theory: You felt overwhelmed by life's pressures and made a desperate choice to get ahead. It backfired—slide down!" },
-          30: { to: 20, label: "Labeling Theory Chute", message: "🔴 Labeling Theory: Society labeled you as a troublemaker after a small mistake, and the stigma made you slip up again—slide down!" },
-          40: { to: 28, label: "Social Learning Chute", message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down!" },
-          47: { to: 35, label: "Conflict Theory Chute", message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down!" }
+          25: { to: 14, label: "Strain Theory Chute to 14", message: "🔴 Strain Theory: You felt overwhelmed by life's pressures and made a desperate choice to get ahead. It backfired—slide down!" },
+          30: { to: 20, label: "Labeling Theory Chute to 20", message: "🔴 Labeling Theory: Society labeled you as a troublemaker after a small mistake, and the stigma made you slip up again—slide down!" },
+          40: { to: 28, label: "Social Learning Chute to 28", message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down!" },
+          47: { to: 35, label: "Conflict Theory Chute to 35", message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down!" }
         };
         this.cards = {
           6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 1); } },
@@ -448,7 +457,18 @@
               cell.innerHTML = `<div>${i}</div>`;
             }
 
-            if (this.ladders[i]) cell.classList.add('ladder');
+            if (this.ladders[i]) {
+              cell.classList.add('ladder');
+              const ladderData = this.ladders[i];
+              const label = document.createElement('div');
+              label.className = 'ladder-label';
+              label.textContent = ladderData.label;
+              const tooltip = document.createElement('div');
+              tooltip.className = 'tooltip-content';
+              tooltip.textContent = ladderData.message;
+              cell.appendChild(label);
+              cell.appendChild(tooltip);
+            }
             if (this.chutes[i]) {
               cell.classList.add('chute');
               const chuteData = this.chutes[i];
@@ -652,8 +672,9 @@
           this.playerPositions[this.currentPlayer] = nextPos;
 
           if (this.ladders[nextPos]) {
-            const ladderPos = this.ladders[nextPos];
-            this.showModal('Ladder!', `🟢 You climbed a ladder! Moving to position ${ladderPos}!`);
+            const ladderData = this.ladders[nextPos];
+            const ladderPos = ladderData.to;
+            this.showModal('Ladder!', `${ladderData.message}\nMoving to position ${ladderPos}!`);
             await this.animateToken(this.currentPlayer, nextPos, ladderPos);
             nextPos = ladderPos;
             this.playerPositions[this.currentPlayer] = nextPos;
