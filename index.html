@@ -271,7 +271,6 @@
     .dice-6 .dot:nth-child(4) { display: block; grid-column: 3; grid-row: 1; }
     .dice-6 .dot:nth-child(5) { display: block; grid-column: 3; grid-row: 2; }
     .dice-6 .dot:nth-child(6) { display: block; grid-column: 3; grid-row: 3; }
-    /* Style for GIFs in slots 1 and 50 */
     .start img, .end img {
       width: 100%;
       height: 100%;
@@ -423,7 +422,7 @@
         this.targetPosition = null;
         this.activePlayers = [false, false, false, false];
         this.playerColors = ['gold', 'red', 'blue', 'green'];
-        this.playerTextColors = ['black', 'white', 'white', 'white']; // Text colors for readability
+        this.playerTextColors = ['black', 'white', 'white', 'white'];
         this.playerNames = ['Jaylen', 'Samantha', 'Marcus', 'Elena'];
         this.playerDescriptions = [
           'Jaylen – He’s trying to do the right thing but life keeps throwing him curveballs. He might make risky choices just to survive. (Strain Theory)',
@@ -555,11 +554,10 @@
 
             if (i === 1) {
               cell.classList.add('start');
-              // Add Start Your Journey GIF
-              cell.innerHTML = `<img src="https://media.giphy.com/media/3o7aD2d7hyM7jkc7zG/giphy.gif" alt="Start Your Journey">`;
+              // Updated Start Line GIF
+              cell.innerHTML = `<img src="https://media.giphy.com/media/27njMqCBPc2SQ/giphy.gif" alt="Start Line">`;
             } else if (i === 50) {
               cell.classList.add('end');
-              // Add Finish Line GIF
               cell.innerHTML = `<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Finish Line">`;
             } else {
               cell.innerHTML = `<div>${i}</div>`;
@@ -694,14 +692,13 @@
         if (this.activePlayers[this.currentPlayer]) {
           this.rollButton.textContent = `${this.playerNames[this.currentPlayer]} Roll Dice`;
           this.rollButton.setAttribute('aria-label', `Roll the dice for ${this.playerNames[this.currentPlayer]}`);
-          // Set the button color to match the player's color
           this.rollButton.style.backgroundColor = this.playerColors[this.currentPlayer];
           this.rollButton.style.color = this.playerTextColors[this.currentPlayer];
         } else {
           this.rollButton.textContent = 'Player Roll Dice';
           this.rollButton.setAttribute('aria-label', 'Roll the dice for current player');
-          this.rollButton.style.backgroundColor = ''; // Reset to default
-          this.rollButton.style.color = ''; // Reset to default
+          this.rollButton.style.backgroundColor = '';
+          this.rollButton.style.color = '';
         }
       }
 
