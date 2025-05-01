@@ -551,7 +551,7 @@
           // Labeling Theory cards
           { theory: "Labeling Theory", text: "You prove the negative labels wrong and gain community support. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Labeling Theory", text: "A teacher sees your potential beyond the labels. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
-          { theory: "Labeling Theory", text: "Society's labels make you doubt yourself, causing a setback.Terminate Marcus Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
+          { theory: "Labeling Theory", text: "Society's labels make you doubt yourself, causing a setback. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Labeling Theory", text: "A false label leads to unfair treatment. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
           { theory: "Labeling Theory", text: "You challenge a negative label by excelling in a community project, earning widespread respect. Move forward 7 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 7); } },
           // Social Learning Theory cards
@@ -568,7 +568,7 @@
           { theory: "Conflict Theory", text: "Unfair treatment by authorities sets you back. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
           { theory: "Conflict Theory", text: "Systemic biases in hiring practices limit your job prospects, hindering your path. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         ];
-        this.cardCells = [6, 10, 15, 23, 28, 33, 37, 48]; // Removed 19
+        this.cardCells = [6, 10, 15, 23, 28, 33, 37, 48]; // Position 19 removed
         this.currentJoinIndex = null;
         this.isProcessingMove = false;
         this.currentCardIndex = 0; // Track current card in stack
@@ -635,9 +635,9 @@
       }
 
       initBoard() {
-        console.log('Initializing board...');
+        console.log('Starting board initialization...');
         try {
-          document müşter.getElementById('loading').style.display = 'none';
+          document.getElementById('loading').style.display = 'none';
           this.board.innerHTML = '';
           this.cells = {};
 
@@ -713,6 +713,7 @@
             }
             this.board.appendChild(cell);
           }
+          console.log('Board initialization completed successfully.');
         } catch (error) {
           console.error('Error in initBoard:', error.message, error.stack);
           document.getElementById('loading').textContent = 'Error: Failed to initialize the game board.';
