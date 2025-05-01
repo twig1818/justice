@@ -76,14 +76,7 @@
       width: 80px;
       line-height: 12px;
     }
-    .chute::after {
-      content: "🔴 Bad Choice! Move Down";
-      position: absolute;
-      font-size: 10px;
-      bottom: 2px;
-      left: 2px;
-      color: red;
-    }
+    /* Removed the ::after pseudo-element for chutes */
     .draw-card { background-color: #d4e3fd !important; position: relative; }
     .draw-card .info-button {
       margin-top: 4px;
@@ -109,6 +102,10 @@
       width: 200px;
     }
     .info-tooltip:hover .tooltip-content {
+      visibility: visible;
+      opacity: 1;
+    }
+    .chute:hover .tooltip-content {
       visibility: visible;
       opacity: 1;
     }
@@ -249,9 +246,6 @@
       .chute-label {
         font-size: 8px;
         width: 50px;
-      }
-      .chute::after {
-        font-size: 8px;
       }
     }
   </style>
@@ -458,22 +452,14 @@
             if (this.chutes[i]) {
               cell.classList.add('chute');
               const chuteData = this.chutes[i];
-              const wrapper = document.createElement('div');
-              wrapper.className = 'info-tooltip';
               const label = document.createElement('div');
               label.className = 'chute-label';
               label.textContent = chuteData.label;
-              const infoButton = document.createElement('button');
-              infoButton.className = 'info-button';
-              infoButton.textContent = 'ℹ️';
-              infoButton.setAttribute('aria-label', `Chute info for cell ${i}`);
               const tooltip = document.createElement('div');
               tooltip.className = 'tooltip-content';
               tooltip.textContent = chuteData.message;
-              wrapper.appendChild(label);
-              wrapper.appendChild(infoButton);
-              wrapper.appendChild(tooltip);
-              cell.appendChild(wrapper);
+              cell.appendChild(label);
+              cell.appendChild(tooltip);
             }
             if (this.cards[i]) {
               cell.classList.add('draw-card');
