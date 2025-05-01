@@ -220,7 +220,6 @@
       background-color: #f44336;
       color: white;
     }
-    /* Dice Styling */
     #diceDisplay {
       display: none;
       position: fixed;
@@ -251,7 +250,6 @@
       place-self: center;
       display: none;
     }
-    /* Dice face configurations */
     .dice-1 .dot:nth-child(1) { display: block; grid-column: 2; grid-row: 2; }
     .dice-2 .dot:nth-child(1) { display: block; grid-column: 1; grid-row: 1; }
     .dice-2 .dot:nth-child(2) { display: block; grid-column: 3; grid-row: 3; }
@@ -375,7 +373,7 @@
       </div>
       <p id="turnDisplay">🎯 Player 1's turn</p>
       <p id="diceResult"></p>
-      <button onclick="game.rollDice()" aria-label="Roll the dice">Roll Dice</button>
+      <button id="rollDiceButton" onclick="game.rollDice()" aria-label="Roll the dice for current player">Player 1 Roll Dice</button>
       <button onclick="game.resetGame()" aria-label="Start over">Start Over</button>
     </div>
     <div>
@@ -383,7 +381,6 @@
       <p id="positionsDisplay">Player positions: <span id="positions">No players</span></p>
     </div>
   </div>
-  <!-- Add dice display element -->
   <div id="diceDisplay">
     <div class="dice">
       <div class="dot"></div>
@@ -432,7 +429,7 @@
         this.diceResult = document.getElementById('diceResult');
         this.diceDisplay = document.getElementById('diceDisplay');
         this.card = document.getElementById('card');
-        this.rollButton = document.querySelector('button[onclick="game.rollDice()"]');
+        this.rollButton = document.getElementById('rollDiceButton');
         this.cells = {};
         this.playerTokens = [null, null, null, null];
         this.cellSize = 94;
@@ -471,6 +468,8 @@
         this.isProcessingMove = false;
         this.initModalElements();
         this.setupEventListeners();
+        // Initialize the Roll Dice button label
+        this.updateRollButtonLabel();
       }
 
       initModalElements() {
@@ -683,6 +682,17 @@
         this.rollButton.disabled = !hasPlayers;
       }
 
+      // Method to update the Roll Dice button label
+      updateRollButtonLabel() {
+        if (this.activePlayers[this.currentPlayer]) {
+          this.rollButton.textContent = `${this.playerNames[this.currentPlayer]} Roll Dice`;
+          this.rollButton.setAttribute('aria-label', `Roll the dice for ${this.playerNames[this.currentPlayer]}`);
+        } else {
+          this.rollButton.textContent = 'Player Roll Dice';
+          this.rollButton.setAttribute('aria-label', 'Roll the dice for current player');
+        }
+      }
+
       joinGame(playerIndex) {
         try {
           if (this.activePlayers[playerIndex]) {
@@ -738,21 +748,16 @@
         }
       }
 
-      // Show the dice graphic
       showDice(roll) {
         const diceElement = this.diceDisplay.querySelector('.dice');
-        // Remove previous dice face classes
         diceElement.className = 'dice';
-        // Add the appropriate class for the rolled number
         diceElement.classList.add(`dice-${roll}`);
-        // Show the dice with animation
         this.diceDisplay.style.display = 'block';
         setTimeout(() => {
           this.diceDisplay.style.opacity = '1';
         }, 10);
       }
 
-      // Hide the dice graphic
       hideDice() {
         this.diceDisplay.style.opacity = '0';
         setTimeout(() => {
@@ -767,13 +772,11 @@
             return;
           }
           this.card.style.display = 'none';
-          this.hideDice(); // Hide any previous dice display
+          this.hideDice();
           const roll = Math.floor(Math.random() * 6) + 1;
           this.pendingRoll = roll;
-          // Show the dice graphic
           this.showDice(roll);
-          // Delay showing the message to let the dice animation play
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 2000));
           this.diceResult.textContent = `Click on the highlighted cell to move!`;
           const currentPos = this.playerPositions[this.currentPlayer];
           this.targetPosition = Math.min(50, currentPos + roll);
@@ -880,7 +883,7 @@
           await this.renderPlayer();
           this.pendingRoll = null;
           this.targetPosition = null;
-          this.hideDice(); // Hide the dice after the move
+          this.hideDice();
           this.clearHighlights();
           this.diceResult.textContent = `🎲 Rolled: --`;
           console.log('After move, reset Pending Roll and Target Position');
@@ -899,12 +902,14 @@
             this.showModal('Game Over', 'No active players remaining.');
             return;
           }
+          let previousPlayer = this.currentPlayer;
           do {
             this.currentPlayer = (this.currentPlayer + 1) % 4;
           } while (!this.activePlayers[this.currentPlayer] && this.activePlayers.includes(true));
           this.turnDisplay.textContent = `🎯 ${this.playerNames[this.currentPlayer]}'s turn (Player ${this.currentPlayer + 1})`;
           this.updateButtonState();
-          console.log(`Next turn: Player ${this.currentPlayer + 1}`);
+          this.updateRollButtonLabel();
+          console.log(`Turn switched from Player ${previousPlayer + 1} (${this.playerNames[previousPlayer]}) to Player ${this.currentPlayer + 1} (${this.playerNames[this.currentPlayer]})`);
         } catch (error) {
           console.error('Error in nextTurn:', error.message, error.stack);
           this.showModal('Error', 'Failed to advance to the next turn. Please reset the game.');
@@ -921,12 +926,13 @@
           this.playerTokens.forEach(token => token?.remove());
           this.playerTokens = [null, null, null, null];
           this.clearHighlights();
-          this.hideDice(); // Hide the dice on reset
+          this.hideDice();
           this.renderPlayer();
           this.card.style.display = 'none';
           this.diceResult.textContent = '';
           this.turnDisplay.textContent = '🎯 Player 1\'s turn';
           this.updateButtonState();
+          this.updateRollButtonLabel();
           console.log('Game reset: Pending Roll and Target Position cleared');
         } catch (error) {
           console.error('Error in resetGame:', error.message, error.stack);
