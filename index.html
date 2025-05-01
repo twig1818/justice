@@ -481,7 +481,11 @@
           { theory: "Conflict Theory", text: "You organize a protest and gain allies against an unfair system. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Conflict Theory", text: "A community leader helps you navigate systemic barriers. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Conflict Theory", text: "Systemic inequality blocks your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
-          { theory: "Conflict Theory", text: "Unfair treatment by authorities sets you back. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } }
+          { theory: "Conflict Theory", text: "Unfair treatment by authorities sets you back. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
+          // New cards added below
+          { theory: "Strain Theory", text: "You join a community program that helps you cope with life’s pressures, giving you a major boost toward your goals. Move forward 6 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 6); } },
+          { theory: "Labeling Theory", text: "A past label resurfaces, causing authorities to unfairly target you again. Move back 5 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 5); } },
+          { theory: "Conflict Theory", text: "You lead a movement against systemic inequality, gaining widespread support and momentum. Move forward 7 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 7); } }
         ];
         this.cardCells = [6, 10, 15, 19, 23, 28, 33, 37, 48];
         this.currentJoinIndex = null;
@@ -896,7 +900,7 @@
           if (this.troubleSlots[nextPos]) {
             const troubleData = this.troubleSlots[nextPos];
             const troublePos = troubleData.to;
-            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
+            this.showModal('Trouble!', `${tr  troubleData.message}\nMoving to position ${troublePos}!`);
             await this.animateToken(this.currentPlayer, nextPos, troublePos);
             nextPos = troublePos;
             this.playerPositions[this.currentPlayer] = nextPos;
