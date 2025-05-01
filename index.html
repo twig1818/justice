@@ -167,12 +167,6 @@
       margin: 10px 0 5px 0;
       font-size: 14px;
     }
-    #positionsDisplay {
-      margin: 10px auto;
-      font-size: 14px;
-      max-width: 900px;
-      text-align: center;
-    }
     #loading {
       margin: 20px;
       font-size: 18px;
@@ -296,7 +290,7 @@
       border: 2px solid #333;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      text-align: left;
+      text-align: center;
     }
     #drawCardStack h3 {
       font-size: 16px;
@@ -325,6 +319,23 @@
       background-color: #1976D2;
     }
     .card-nav-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #drawCardButton {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #drawCardButton:hover {
+      background-color: #45a049;
+    }
+    #drawCardButton:disabled {
       background-color: #ccc;
       cursor: not-allowed;
     }
@@ -358,9 +369,6 @@
         padding: 6px 12px;
       }
       #playerSelection p {
-        font-size: 12px;
-      }
-      #positionsDisplay {
         font-size: 12px;
       }
       #gameModalContent {
@@ -403,7 +411,7 @@
       #drawCardStack p {
         font-size: 12px;
       }
-      .card-nav-button {
+      .card-nav-button, #drawCardButton {
         font-size: 12px;
         padding: 6px 12px;
       }
@@ -459,7 +467,6 @@
     </div>
     <div>
       <div id="board" role="grid" aria-live="polite"></div>
-      <p id="positionsDisplay">Player positions: <span id="positions">No players</span></p>
       <div id="drawCardStack" role="region" aria-live="polite" aria-label="Draw card stack">
         <h3 id="cardTheory"></h3>
         <p id="cardText"></p>
@@ -467,6 +474,7 @@
           <button class="card-nav-button" onclick="game.prevCard()" aria-label="Previous card">Previous</button>
           <button class="card-nav-button" onclick="game.nextCard()" aria-label="Next card">Next</button>
         </div>
+        <button id="drawCardButton" onclick="game.drawCardFromDeck()" aria-label="Draw a card from the deck" disabled>Draw Card</button>
       </div>
     </div>
   </div>
@@ -515,12 +523,12 @@
           'Marcus – All his friends are doing it, and that’s how he’s learning what’s “normal.” He’s picking up habits from the people around him. (Social Learning Theory)',
           'Elena – She sees how unfair the system is, especially for people who look like her. She wants change but faces constant obstacles. (Conflict Theory)'
         ];
-        this.positionsDisplay = document.getElementById('positions');
         this.turnDisplay = document.getElementById('turnDisplay');
         this.diceResult = document.getElementById('diceResult');
         this.diceDisplay = document.getElementById('diceDisplay');
         this.card = document.getElementById('card');
         this.rollButton = document.getElementById('rollDiceButton');
+        this.drawCardButton = document.getElementById('drawCardButton');
         this.cells = {};
         this.playerTokens = [null, null, null, null];
         this.cellSize = 94;
@@ -572,6 +580,8 @@
         this.currentJoinIndex = null;
         this.isProcessingMove = false;
         this.currentCardIndex = 0; // Track current card in stack
+        this.isDrawCardPending = false; // Track if a card draw is pending
+        this.lastCardPosition = null; // Track the position where the card draw is pending
         this.initModalElements();
         this.setupEventListeners();
         this.updateRollButtonLabel();
@@ -774,7 +784,6 @@
             }
           });
 
-          let positionsText = '';
           this.playerPositions.forEach((pos, index) => {
             if (this.activePlayers[index]) {
               const token = this.playerTokens[index];
@@ -783,10 +792,8 @@
               }
               const offset = this.getTokenOffset(index, pos);
               token.style.transform = `translate(-50%, -50%) translateX(${offset}px)`;
-              positionsText += `${this.playerNames[index]}: ${pos} | `;
             }
           });
-          this.positionsDisplay.textContent = positionsText ? positionsText.slice(0, -3) : 'No players';
         } catch (error) {
           console.error('Error in renderPlayer:', error.message, error.stack);
           this.showModal('Error', 'Failed to render players. Please reset the game.');
@@ -1022,26 +1029,10 @@
           }
 
           if (this.cardCells.includes(nextPos)) {
-            const cardData = this.drawRandomCard();
-            console.log(`Drew card at position ${nextPos}: ${cardData.text}`);
-            const prevPos = this.playerPositions[this.currentPlayer];
-            cardData.effect(this);
-            const newPos = this.playerPositions[this.currentPlayer];
-            console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
-            
-            const displayText = `${cardData.theory}: ${cardData.text}`;
-            this.showModal('Action Card', `${displayText}\nYou moved to position ${newPos}!`);
-
-            if (newPos !== nextPos) {
-              await this.animateToken(this.currentPlayer, nextPos, newPos);
-              nextPos = newPos;
-              this.playerPositions[this.currentPlayer] = nextPos;
-            } else {
-              console.log(`No position change after card effect, proceeding`);
-              await new Promise(resolve => setTimeout(resolve, 300));
-            }
-            this.card.textContent = displayText;
-            this.card.style.display = 'block';
+            this.isDrawCardPending = true;
+            this.lastCardPosition = nextPos;
+            this.drawCardButton.disabled = false;
+            this.showModal('Draw a Card', 'Please click the "Draw Card" button on the deck below to draw your card.');
           } else {
             this.card.style.display = 'none';
           }
@@ -1092,6 +1083,42 @@
         }
       }
 
+      async drawCardFromDeck() {
+        if (!this.isDrawCardPending) {
+          this.showModal('Notice', 'You can only draw a card after landing on a Draw Card square.');
+          return;
+        }
+
+        try {
+          this.isDrawCardPending = false;
+          this.drawCardButton.disabled = true;
+          const nextPos = this.lastCardPosition;
+          const cardData = this.drawRandomCard();
+          console.log(`Drew card at position ${nextPos}: ${cardData.text}`);
+          const prevPos = this.playerPositions[this.currentPlayer];
+          cardData.effect(this);
+          const newPos = this.playerPositions[this.currentPlayer];
+          console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
+          
+          const displayText = `${cardData.theory}: ${cardData.text}`;
+          this.showModal('Action Card', `${displayText}\nYou moved to position ${newPos}!`);
+
+          if (newPos !== nextPos) {
+            await this.animateToken(this.currentPlayer, nextPos, newPos);
+            this.playerPositions[this.currentPlayer] = newPos;
+          } else {
+            console.log(`No position change after card effect, proceeding`);
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+          this.card.textContent = displayText;
+          this.card.style.display = 'block';
+          await this.renderPlayer();
+        } catch (error) {
+          console.error('Error in drawCardFromDeck:', error.message, error.stack);
+          this.showModal('Error', 'An error occurred while drawing a card. Please try again.');
+        }
+      }
+
       nextTurn() {
         try {
           if (!this.activePlayers.includes(true)) {
@@ -1128,6 +1155,9 @@
           this.diceResult.textContent = '';
           this.turnDisplay.textContent = '🎯 Player 1\'s turn';
           this.currentCardIndex = 0; // Reset card stack
+          this.isDrawCardPending = false; // Reset card draw state
+          this.lastCardPosition = null;
+          this.drawCardButton.disabled = true;
           this.updateCardStack();
           this.canvas.style.display = 'none'; // Hide fireworks
           this.particles = [];
@@ -1148,10 +1178,16 @@
             console.error('Card stack elements not found!');
             return;
           }
-          const card = this.cardPool[this.currentCardIndex];
-          cardTheory.textContent = card.theory;
-          cardText.textContent = card.text;
-          document.getElementById('drawCardStack').setAttribute('aria-label', `Draw card stack, showing card ${this.currentCardIndex + 1} of ${this.cardPool.length}: ${card.theory}, ${card.text}`);
+          if (this.isDrawCardPending) {
+            const card = this.cardPool[this.currentCardIndex];
+            cardTheory.textContent = card.theory;
+            cardText.textContent = card.text;
+            document.getElementById('drawCardStack').setAttribute('aria-label', `Draw card stack, showing card ${this.currentCardIndex + 1} of ${this.cardPool.length}: ${card.theory}, ${card.text}`);
+          } else {
+            cardTheory.textContent = 'Card Deck';
+            cardText.textContent = 'Click "Draw Card" when prompted to draw a card.';
+            document.getElementById('drawCardStack').setAttribute('aria-label', 'Draw card stack, showing cover card. Click Draw Card when prompted.');
+          }
         } catch (error) {
           console.error('Error in updateCardStack:', error.message, error.stack);
         }
