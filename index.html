@@ -64,7 +64,6 @@
       width: 80px;
       line-height: 12px;
     }
-    /* Removed the ::after pseudo-element for ladders */
     .chute { background-color: #fdd4d4 !important; position: relative; }
     .chute .chute-label {
       position: absolute;
@@ -348,16 +347,16 @@
         this.playerTokens = [null, null, null, null];
         this.cellSize = 94;
         this.ladders = {
-          4: { to: 18, label: "Strain Theory Ladder to 18", message: "🟢 Strain Theory: You found a mentor who helped you overcome life's pressures—climb up!" },
-          11: { to: 26, label: "Labeling Theory Ladder to 26", message: "🟢 Labeling Theory: You worked hard to break free from a negative label and gained support—climb up!" },
-          29: { to: 39, label: "Social Learning Ladder to 39", message: "🟢 Social Learning Theory: You learned positive habits from a role model—climb up!" },
-          42: { to: 48, label: "Conflict Theory Ladder to 48", message: "🟢 Conflict Theory: You advocated for change and gained allies in the system—climb up!" }
+          4: { to: 18, label: "Strain Theory Ladder to 18", message: "🟢 Strain Theory: You found a mentor who helped you overcome life's pressures—climb up to 18!" },
+          11: { to: 26, label: "Labeling Theory Ladder to 26", message: "🟢 Labeling Theory: You worked hard to break free from a negative label and gained support—climb up to 26!" },
+          29: { to: 39, label: "Social Learning Ladder to 39", message: "🟢 Social Learning Theory: You learned positive habits from a role model—climb up to 39!" },
+          42: { to: 48, label: "Conflict Theory Ladder to 48", message: "🟢 Conflict Theory: You advocated for change and gained allies in the system—climb up to 48!" }
         };
         this.chutes = {
-          25: { to: 14, label: "Strain Theory Chute to 14", message: "🔴 Strain Theory: You felt overwhelmed by life's pressures and made a desperate choice to get ahead. It backfired—slide down!" },
-          30: { to: 20, label: "Labeling Theory Chute to 20", message: "🔴 Labeling Theory: Society labeled you as a troublemaker after a small mistake, and the stigma made you slip up again—slide down!" },
-          40: { to: 28, label: "Social Learning Chute to 28", message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down!" },
-          47: { to: 35, label: "Conflict Theory Chute to 35", message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down!" }
+          25: { to: 14, label: "Strain Theory Chute to 14", message: "🔴 Strain Theory: You felt overwhelmed by life's pressures and made a desperate choice to get ahead. It backfired—slide down to 14!" },
+          30: { to: 20, label: "Labeling Theory Chute to 20", message: "🔴 Labeling Theory: Society labeled you as a troublemaker after a small mistake, and the stigma made you slip up again—slide down to 20!" },
+          40: { to: 28, label: "Social Learning Chute to 28", message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down to 28!" },
+          47: { to: 35, label: "Conflict Theory Chute to 35", message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down to 35!" }
         };
         this.cards = {
           6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 1); } },
