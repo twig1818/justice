@@ -47,6 +47,10 @@
       transition: transform 0.3s ease-in-out;
       z-index: 10;
     }
+    .highlight {
+      border: 3px solid yellow !important;
+      background-color: rgba(255, 255, 0, 0.3) !important;
+    }
     .ladder { background-color: #d4fdd4 !important; }
     .ladder::after {
       content: "🟢 Good Choice! Move Up";
@@ -202,7 +206,6 @@
     <p id="turnDisplay">🎯 Player 1's turn</p>
     <p id="diceResult"></p>
     <button onclick="game.rollDice()" aria-label="Roll the dice">Roll Dice</button>
-    <button onclick="game.movePlayer()" aria-label="Move player">Move Player</button>
     <div class="card" id="card" style="display:none;" role="alert"></div>
   </div>
   <script>
@@ -211,6 +214,7 @@
         this.playerPositions = [1, 1, 1, 1];
         this.currentPlayer = 0;
         this.pendingRoll = null;
+        this.targetPosition = null;
         this.activePlayers = [false, false, false, false];
         this.playerColors = ['gold', 'red', 'blue', 'green'];
         this.playerNames = ['Jaylen', 'Samantha', 'Marcus', 'Elena'];
@@ -220,7 +224,6 @@
         this.diceResult = document.getElementById('diceResult');
         this.card = document.getElementById('card');
         this.rollButton = document.querySelector('button[onclick="game.rollDice()"]');
-        this.moveButton = document.querySelector('button[onclick="game.movePlayer()"]');
         this.cells = {};
         this.playerTokens = [null, null, null, null];
         this.cellSize = 94; // Cell width/height (90px + 4px gap)
@@ -249,6 +252,8 @@
             cell.setAttribute('role', 'gridcell');
             cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cards[i] ? ', draw card' : ''}`);
             cell.tabIndex = 0;
+            cell.dataset.position = i; // Store position for click handling
+            cell.addEventListener('click', () => this.handleCellClick(i));
             this.cells[i] = cell;
 
             if (i === 1) {
@@ -325,10 +330,8 @@
 
           console.log(`Animating Player ${playerIndex + 1} from ${fromPos} to ${toPos}, dx=${dx}, dy=${dy}, fromOffset=${fromOffset}, toOffset=${toOffset}`);
 
-          // Move token to the new cell first to ensure it’s in the correct DOM position
           this.cells[toPos].appendChild(token);
 
-          // Apply the animation
           token.style.transform = `translate(${dx - 50 + fromOffset}%, ${dy - 50}%)`;
 
           const onTransitionEnd = () => {
@@ -339,13 +342,12 @@
             resolve();
           };
 
-          // Fallback timeout to ensure the Promise resolves
           const timeout = setTimeout(() => {
             token.removeEventListener('transitionend', onTransitionEnd);
             token.style.transform = `translate(-50%, -50%) translateX(${toOffset}px)`;
             console.warn(`Animation timeout for Player ${playerIndex + 1}, forcing completion to position ${toPos}`);
             resolve();
-          }, 1000); // 1 second timeout
+          }, 1000);
 
           token.addEventListener('transitionend', onTransitionEnd, { once: true });
         });
@@ -387,7 +389,6 @@
       updateButtonState() {
         const hasPlayers = this.activePlayers.includes(true);
         this.rollButton.disabled = !hasPlayers;
-        this.moveButton.disabled = !hasPlayers;
       }
 
       joinGame(playerIndex) {
@@ -409,6 +410,19 @@
         }
       }
 
+      clearHighlights() {
+        Object.values(this.cells).forEach(cell => {
+          cell.classList.remove('highlight');
+        });
+      }
+
+      highlightTargetCell(position) {
+        this.clearHighlights();
+        if (this.cells[position]) {
+          this.cells[position].classList.add('highlight');
+        }
+      }
+
       rollDice() {
         try {
           if (!this.activePlayers.includes(true)) {
@@ -418,25 +432,32 @@
           this.card.style.display = 'none';
           const roll = Math.floor(Math.random() * 6) + 1;
           this.pendingRoll = roll;
-          this.diceResult.textContent = `🎲 Rolled: ${roll}`;
+          this.diceResult.textContent = `🎲 Rolled: ${roll}. Click on the highlighted cell to move!`;
+          const currentPos = this.playerPositions[this.currentPlayer];
+          this.targetPosition = Math.min(50, currentPos + roll);
+          this.highlightTargetCell(this.targetPosition);
         } catch (error) {
           console.error('Error in rollDice:', error);
           alert('Failed to roll the dice. Please reset the game.');
         }
       }
 
-      async movePlayer() {
+      async handleCellClick(position) {
         if (this.pendingRoll === null) {
           alert('Please roll the dice first!');
           return;
         }
 
-        this.moveButton.disabled = true;
+        if (position !== this.targetPosition) {
+          alert(`You must move to cell ${this.targetPosition}!`);
+          return;
+        }
+
         try {
-          console.log(`Moving Player ${this.currentPlayer + 1}, current position: ${this.playerPositions[this.currentPlayer]}, roll: ${this.pendingRoll}`);
+          console.log(`Player ${this.currentPlayer + 1} clicked cell ${position}`);
           
           const currentPos = this.playerPositions[this.currentPlayer];
-          let nextPos = Math.min(50, currentPos + this.pendingRoll);
+          let nextPos = position;
 
           await this.animateToken(this.currentPlayer, currentPos, nextPos);
           this.playerPositions[this.currentPlayer] = nextPos;
@@ -484,19 +505,19 @@
             if (!this.activePlayers.includes(true)) {
               alert('Game Over! All players have finished.');
               this.resetGame();
-              this.moveButton.disabled = false;
               return;
             }
           }
 
           await this.renderPlayer();
           this.pendingRoll = null;
+          this.targetPosition = null;
+          this.clearHighlights();
+          this.diceResult.textContent = `🎲 Rolled: --`;
           this.nextTurn();
         } catch (error) {
-          console.error('Error in movePlayer:', error);
+          console.error('Error in handleCellClick:', error);
           alert('An error occurred during the move. Please reset the game.');
-        } finally {
-          this.moveButton.disabled = false;
         }
       }
 
@@ -518,9 +539,11 @@
           this.playerPositions = [1, 1, 1, 1];
           this.currentPlayer = 0;
           this.pendingRoll = null;
+          this.targetPosition = null;
           this.activePlayers = [false, false, false, false];
           this.playerTokens.forEach(token => token?.remove());
           this.playerTokens = [null, null, null, null];
+          this.clearHighlights();
           this.renderPlayer();
           this.card.style.display = 'none';
           this.diceResult.textContent = '';
