@@ -155,6 +155,12 @@
       margin: 10px 0 5px 0;
       font-size: 14px;
     }
+    #positionsDisplay {
+      margin: 10px auto;
+      font-size: 14px;
+      max-width: 900px;
+      text-align: center;
+    }
     #loading {
       margin: 20px;
       font-size: 18px;
@@ -236,6 +242,9 @@
       #playerSelection p {
         font-size: 12px;
       }
+      #positionsDisplay {
+        font-size: 12px;
+      }
       #gameModalContent {
         padding: 15px;
       }
@@ -302,7 +311,6 @@
           </div>
         </div>
       </div>
-      <p>Player positions: <span id="positions">No players</span></p>
       <p id="turnDisplay">🎯 Player 1's turn</p>
       <p id="diceResult"></p>
       <button onclick="game.rollDice()" aria-label="Roll the dice">Roll Dice</button>
@@ -310,6 +318,8 @@
     </div>
     <div>
       <div id="board" role="grid" aria-live="polite"></div>
+      <!-- Moved Player positions here -->
+      <p id="positionsDisplay">Player positions: <span id="positions">No players</span></p>
     </div>
   </div>
   <div style="margin-top: 20px;">
@@ -366,22 +376,18 @@
           47: { to: 35, label: "Conflict Theory Chute to 35", message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down to 35!" }
         };
         this.cardPool = [
-          // Strain Theory Cards
           { theory: "Strain Theory", text: "A mentor helps you manage stress from life's pressures. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           { theory: "Strain Theory", text: "You secure a part-time job to ease financial strain. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Strain Theory", text: "The pressure to succeed leads you to a risky decision. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
           { theory: "Strain Theory", text: "Financial strain causes you to miss an opportunity. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
-          // Labeling Theory Cards
           { theory: "Labeling Theory", text: "You prove the negative labels wrong and gain community support. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Labeling Theory", text: "A teacher sees your potential beyond the labels. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Labeling Theory", text: "Society's labels make you doubt yourself, causing a setback. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Labeling Theory", text: "A false label leads to unfair treatment. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
-          // Social Learning Theory Cards
           { theory: "Social Learning Theory", text: "You learn a valuable skill from a positive role model. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           { theory: "Social Learning Theory", text: "A friend inspires you to make better choices. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Social Learning Theory", text: "You pick up a bad habit from peers. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
           { theory: "Social Learning Theory", text: "Negative influences lead you astray. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
-          // Conflict Theory Cards
           { theory: "Conflict Theory", text: "You organize a protest and gain allies against an unfair system. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Conflict Theory", text: "A community leader helps you navigate systemic barriers. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Conflict Theory", text: "Systemic inequality blocks your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
@@ -662,7 +668,6 @@
           }
           this.card.style.display = 'none';
           const roll = Math.floor(Math.random() * 6) + 1;
-          this.pendingRoll = roll;
           this.diceResult.textContent = `🎲 Rolled: ${roll}. Click on the highlighted cell to move!`;
           const currentPos = this.playerPositions[this.currentPlayer];
           this.targetPosition = Math.min(50, currentPos + roll);
@@ -718,7 +723,6 @@
             const newPos = this.playerPositions[this.currentPlayer];
             console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
             
-            // Prepend the theory name to the card's text
             const displayText = `${cardData.theory}: ${cardData.text}`;
             this.showModal('Action Card', `${displayText}\nYou moved to position ${newPos}!`);
 
@@ -730,7 +734,7 @@
               console.log(`No position change after card effect, proceeding`);
               await new Promise(resolve => setTimeout(resolve, 300));
             }
-            this.card.textContent = displayText; // Display the theory in the card below the board
+            this.card.textContent = displayText;
             this.card.style.display = 'block';
           } else {
             this.card.style.display = 'none';
