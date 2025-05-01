@@ -87,12 +87,6 @@
       padding: 2px 4px;
       font-weight: bold;
     }
-    .trouble { background-color: #ffcccb !important; position: relative; }
-    .trouble img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
     .tooltip-content {
       visibility: hidden;
       background-color: #333;
@@ -121,11 +115,8 @@
       visibility: visible;
       opacity: 1;
     }
-    .trouble:hover .tooltip-content {
-      visibility: visible; opacity: 1;
-    }
-    .start { background-color: #a8e6ff !important; }
-    .end { background-color: #b9fbc0 !important; }
+    .start { background-color: #a8e6ff !important; font-weight: bold; }
+    .end { background-color: #b9fbc0 !important; font-weight: bold; }
     .card {
       margin: 20px auto;
       padding: 10px;
@@ -229,60 +220,7 @@
       background-color: #f44336;
       color: white;
     }
-    #victoryModal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      z-index: 200;
-      justify-content: center;
-      align-items: center;
-    }
-    #victoryModalContent {
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      max-width: 600px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-      border: 3px solid #4CAF50;
-    }
-    #victoryModalContent h2 {
-      margin: 0 0 20px 0;
-      font-size: 28px;
-      color: #4CAF50;
-      text-transform: uppercase;
-    }
-    #victoryModalContent p {
-      font-size: 18px;
-      margin: 0 0 20px 0;
-      line-height: 1.5;
-      color: #333;
-    }
-    #victoryModalContent img {
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      margin: 20px 0;
-      border-radius: 8px;
-    }
-    .victory-button {
-      background-color: #4CAF50;
-      color: white;
-      padding: 12px 24px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .victory-button:hover {
-      background-color: #45a049;
-    }
+    /* Dice Styling */
     #diceDisplay {
       display: none;
       position: fixed;
@@ -313,6 +251,7 @@
       place-self: center;
       display: none;
     }
+    /* Dice face configurations */
     .dice-1 .dot:nth-child(1) { display: block; grid-column: 2; grid-row: 2; }
     .dice-2 .dot:nth-child(1) { display: block; grid-column: 1; grid-row: 1; }
     .dice-2 .dot:nth-child(2) { display: block; grid-column: 3; grid-row: 3; }
@@ -334,11 +273,6 @@
     .dice-6 .dot:nth-child(4) { display: block; grid-column: 3; grid-row: 1; }
     .dice-6 .dot:nth-child(5) { display: block; grid-column: 3; grid-row: 2; }
     .dice-6 .dot:nth-child(6) { display: block; grid-column: 3; grid-row: 3; }
-    .start img, .end img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
     @media (max-width: 600px) {
       #board {
         grid-template-columns: repeat(10, 60px);
@@ -394,23 +328,6 @@
         width: 12px;
         height: 12px;
       }
-      #victoryModalContent {
-        padding: 20px;
-        max-width: 90%;
-      }
-      #victoryModalContent h2 {
-        font-size: 20px;
-      }
-      #victoryModalContent p {
-        font-size: 14px;
-      }
-      #victoryModalContent img {
-        max-width: 200px;
-      }
-      .victory-button {
-        padding: 10px 20px;
-        font-size: 14px;
-      }
     }
   </style>
 </head>
@@ -458,7 +375,7 @@
       </div>
       <p id="turnDisplay">🎯 Player 1's turn</p>
       <p id="diceResult"></p>
-      <button id="rollDiceButton" onclick="game.rollDice()" aria-label="Roll the dice for current player">Player 1 Roll Dice</button>
+      <button onclick="game.rollDice()" aria-label="Roll the dice">Roll Dice</button>
       <button onclick="game.resetGame()" aria-label="Start over">Start Over</button>
     </div>
     <div>
@@ -466,6 +383,7 @@
       <p id="positionsDisplay">Player positions: <span id="positions">No players</span></p>
     </div>
   </div>
+  <!-- Add dice display element -->
   <div id="diceDisplay">
     <div class="dice">
       <div class="dot"></div>
@@ -486,14 +404,6 @@
       <div class="modal-buttons" id="gameModalButtons"></div>
     </div>
   </div>
-  <div id="victoryModal" role="dialog" aria-labelledby="victoryModalTitle" aria-modal="true">
-    <div id="victoryModalContent">
-      <h2 id="victoryModalTitle"></h2>
-      <p id="victoryModalDescription"></p>
-      <img src="https://media.giphy.com/media/xUOwFUnsoHbFLn16eY/giphy.gif" alt="Continue Your Journey GIF">
-      <button class="victory-button" onclick="game.closeVictoryModal()" aria-label="Continue">Continue</button>
-    </div>
-  </div>
   <script>
     class Game {
       constructor() {
@@ -510,7 +420,6 @@
         this.targetPosition = null;
         this.activePlayers = [false, false, false, false];
         this.playerColors = ['gold', 'red', 'blue', 'green'];
-        this.playerTextColors = ['black', 'white', 'white', 'white'];
         this.playerNames = ['Jaylen', 'Samantha', 'Marcus', 'Elena'];
         this.playerDescriptions = [
           'Jaylen – He’s trying to do the right thing but life keeps throwing him curveballs. He might make risky choices just to survive. (Strain Theory)',
@@ -523,7 +432,7 @@
         this.diceResult = document.getElementById('diceResult');
         this.diceDisplay = document.getElementById('diceDisplay');
         this.card = document.getElementById('card');
-        this.rollButton = document.getElementById('rollDiceButton');
+        this.rollButton = document.querySelector('button[onclick="game.rollDice()"]');
         this.cells = {};
         this.playerTokens = [null, null, null, null];
         this.cellSize = 94;
@@ -538,10 +447,6 @@
           30: { to: 20, label: "Labeling Theory Chute to 20", message: "🔴 Labeling Theory: Society labeled you as a troublemaker after a small mistake, and the stigma made you slip up again—slide down to 20!" },
           40: { to: 28, label: "Social Learning Chute to 28", message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down to 28!" },
           47: { to: 35, label: "Conflict Theory Chute to 35", message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down to 35!" }
-        };
-        this.troubleSlots = {
-          17: { to: 1, message: "🔴 Social Learning Theory: You saw your friends spray painting and thought it was okay, but you got caught! Go back to the start line." },
-          31: { to: 1, message: "🔴 Labeling Theory: You were labeled a troublemaker after spray painting, leading to more trouble! Go back to the start line." }
         };
         this.cardPool = [
           { theory: "Strain Theory", text: "A mentor helps you manage stress from life's pressures. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
@@ -559,17 +464,13 @@
           { theory: "Conflict Theory", text: "You organize a protest and gain allies against an unfair system. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Conflict Theory", text: "A community leader helps you navigate systemic barriers. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Conflict Theory", text: "Systemic inequality blocks your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
-          { theory: "Conflict Theory", text: "Unfair treatment by authorities sets you back. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
-          { theory: "Strain Theory", text: "You join a community program that helps you cope with life’s pressures, giving you a major boost toward your goals. Move forward 6 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 6); } },
-          { theory: "Labeling Theory", text: "A past label resurfaces, causing authorities to unfairly target you again. Move back 5 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 5); } },
-          { theory: "Conflict Theory", text: "You lead a movement against systemic inequality, gaining widespread support and momentum. Move forward 7 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 7); } }
+          { theory: "Conflict Theory", text: "Unfair treatment by authorities sets you back. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } }
         ];
         this.cardCells = [6, 10, 15, 19, 23, 28, 33, 37, 48];
         this.currentJoinIndex = null;
         this.isProcessingMove = false;
         this.initModalElements();
         this.setupEventListeners();
-        this.updateRollButtonLabel();
       }
 
       initModalElements() {
@@ -578,14 +479,9 @@
         this.gameModalTitle = document.getElementById('gameModalTitle');
         this.gameModalDescription = document.getElementById('gameModalDescription');
         this.gameModalButtons = document.getElementById('gameModalButtons');
-        this.victoryModal = document.getElementById('victoryModal');
-        this.victoryModalTitle = document.getElementById('victoryModalTitle');
-        this.victoryModalDescription = document.getElementById('victoryModalDescription');
-        if (!this.gameModal || !this.gameModalTitle || !this.gameModalDescription || !this.gameModalButtons ||
-            !this.victoryModal || !this.victoryModalTitle || !this.victoryModalDescription) {
+        if (!this.gameModal || !this.gameModalTitle || !this.gameModalDescription || !this.gameModalButtons) {
           console.error('Modal elements not found!');
           document.getElementById('loading').textContent = 'Error: Modal elements not found.';
-          document.getElementById('loading').style.display = 'block';
         }
       }
 
@@ -594,9 +490,6 @@
           if (e.key === 'Escape' && this.gameModal && this.gameModal.style.display === 'flex') {
             this.gameModal.style.display = 'none';
             this.currentJoinIndex = null;
-          }
-          if (e.key === 'Escape' && this.victoryModal && this.victoryModal.style.display === 'flex') {
-            this.closeVictoryModal();
           }
         });
 
@@ -608,21 +501,12 @@
             }
           });
         }
-
-        if (this.victoryModal) {
-          this.victoryModal.addEventListener('click', (e) => {
-            if (e.target === this.victoryModal) {
-              this.closeVictoryModal();
-            }
-          });
-        }
       }
 
       showModal(title, message, buttons = [{ text: 'OK', class: 'modal-button-ok', onClick: () => this.gameModal.style.display = 'none' }]) {
         if (!this.gameModal || !this.gameModalTitle || !this.gameModalDescription || !this.gameModalButtons) {
           console.error('Cannot show modal: modal elements not initialized');
           document.getElementById('loading').textContent = 'Error: Cannot display modal.';
-          document.getElementById('loading').style.display = 'block';
           return;
         }
         this.gameModalTitle.textContent = title;
@@ -644,33 +528,10 @@
         this.gameModalButtons.querySelector('button').focus();
       }
 
-      showVictoryModal(playerName) {
-        if (!this.victoryModal || !this.victoryModalTitle || !this.victoryModalDescription) {
-          console.error('Cannot show victory modal: modal elements not initialized');
-          document.getElementById('loading').textContent = 'Error: Cannot display victory modal.';
-          document.getElementById('loading').style.display = 'block';
-          return;
-        }
-        console.log(`Showing victory modal for ${playerName}`);
-        this.victoryModalTitle.textContent = `${playerName} Wins!`;
-        this.victoryModalDescription.textContent = 'You have won the game, but your journey is up to you. Continue your journey.';
-        this.victoryModal.style.display = 'flex';
-        this.victoryModal.querySelector('.victory-button').focus();
-      }
-
-      closeVictoryModal() {
-        if (this.victoryModal) {
-          console.log('Closing victory modal');
-          this.victoryModal.style.display = 'none';
-        }
-      }
-
       initBoard() {
         console.log('Initializing board...');
-        const loadingElement = document.getElementById('loading');
         try {
-          loadingElement.textContent = 'Loading board...';
-          loadingElement.style.display = 'block';
+          document.getElementById('loading').style.display = 'none';
           this.board.innerHTML = '';
           this.cells = {};
 
@@ -680,8 +541,7 @@
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
-            const troubleMessage = this.troubleSlots[i] ? `, ${this.troubleSlots[i].message}` : '';
-            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}`);
+            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.removeEventListener('click', this.handleCellClickBound);
@@ -690,18 +550,10 @@
 
             if (i === 1) {
               cell.classList.add('start');
-              cell.innerHTML = `<div>Start</div>`; // Replaced Giphy GIF with static text
+              cell.innerHTML = `<div>1<br>Start Your Future</div>`;
             } else if (i === 50) {
               cell.classList.add('end');
-              cell.innerHTML = `<div>Finish</div>`; // Replaced Giphy GIF with static text
-            } else if (i === 17 || i === 31) {
-              cell.classList.add('trouble');
-              const troubleData = this.troubleSlots[i];
-              cell.innerHTML = `<div>Trouble</div>`; // Replaced Giphy GIF with static text
-              const tooltip = document.createElement('div');
-              tooltip.className = 'tooltip-content';
-              tooltip.textContent = troubleData.message;
-              cell.appendChild(tooltip);
+              cell.innerHTML = `<div>50<br>You Made the Right Choices</div>`;
             } else {
               cell.innerHTML = `<div>${i}</div>`;
             }
@@ -747,19 +599,15 @@
             }
             this.board.appendChild(cell);
           }
-          console.log('Board initialization complete, hiding loading message');
-          loadingElement.style.display = 'none';
         } catch (error) {
           console.error('Error in initBoard:', error.message, error.stack);
-          loadingElement.textContent = `Error: Failed to initialize the game board. ${error.message}`;
-          loadingElement.style.display = 'block';
+          document.getElementById('loading').textContent = 'Error: Failed to initialize the game board.';
           this.showModal('Error', 'Failed to initialize the game board. Please refresh the page.');
         }
       }
 
       drawRandomCard() {
         const randomIndex = Math.floor(Math.random() * this.cardPool.length);
-        console.log(`Drawing card ${randomIndex}: ${this.cardPool[randomIndex].text}`);
         return this.cardPool[randomIndex];
       }
 
@@ -835,20 +683,6 @@
         this.rollButton.disabled = !hasPlayers;
       }
 
-      updateRollButtonLabel() {
-        if (this.activePlayers[this.currentPlayer]) {
-          this.rollButton.textContent = `${this.playerNames[this.currentPlayer]} Roll Dice`;
-          this.rollButton.setAttribute('aria-label', `Roll the dice for ${this.playerNames[this.currentPlayer]}`);
-          this.rollButton.style.backgroundColor = this.playerColors[this.currentPlayer];
-          this.rollButton.style.color = this.playerTextColors[this.currentPlayer];
-        } else {
-          this.rollButton.textContent = 'Player Roll Dice';
-          this.rollButton.setAttribute('aria-label', 'Roll the dice for current player');
-          this.rollButton.style.backgroundColor = '';
-          this.rollButton.style.color = '';
-        }
-      }
-
       joinGame(playerIndex) {
         try {
           if (this.activePlayers[playerIndex]) {
@@ -904,16 +738,21 @@
         }
       }
 
+      // Show the dice graphic
       showDice(roll) {
         const diceElement = this.diceDisplay.querySelector('.dice');
+        // Remove previous dice face classes
         diceElement.className = 'dice';
+        // Add the appropriate class for the rolled number
         diceElement.classList.add(`dice-${roll}`);
+        // Show the dice with animation
         this.diceDisplay.style.display = 'block';
         setTimeout(() => {
           this.diceDisplay.style.opacity = '1';
         }, 10);
       }
 
+      // Hide the dice graphic
       hideDice() {
         this.diceDisplay.style.opacity = '0';
         setTimeout(() => {
@@ -928,11 +767,13 @@
             return;
           }
           this.card.style.display = 'none';
-          this.hideDice();
+          this.hideDice(); // Hide any previous dice display
           const roll = Math.floor(Math.random() * 6) + 1;
           this.pendingRoll = roll;
+          // Show the dice graphic
           this.showDice(roll);
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          // Delay showing the message to let the dice animation play
+          await new Promise(resolve => setTimeout(resolve, 1000));
           this.diceResult.textContent = `Click on the highlighted cell to move!`;
           const currentPos = this.playerPositions[this.currentPlayer];
           this.targetPosition = Math.min(50, currentPos + roll);
@@ -982,8 +823,7 @@
             nextPos = ladderPos;
             this.playerPositions[this.currentPlayer] = nextPos;
           }
-
-          if (this.chutes[nextPos]) {
+          else if (this.chutes[nextPos]) {
             const chuteData = this.chutes[nextPos];
             const chutePos = chuteData.to;
             this.showModal('Chute!', `${chuteData.message}\nMoving to position ${chutePos}!`);
@@ -1005,8 +845,8 @@
 
             if (newPos !== nextPos) {
               await this.animateToken(this.currentPlayer, nextPos, newPos);
-              nextPos = newPos;
-              this.playerPositions[this.currentPlayer] = nextPos;
+              this.playerPositions[this.currentPlayer] = newPos;
+              await this.renderPlayer();
             } else {
               console.log(`No position change after card effect, proceeding`);
               await new Promise(resolve => setTimeout(resolve, 300));
@@ -1017,25 +857,12 @@
             this.card.style.display = 'none';
           }
 
-          if (this.troubleSlots[nextPos]) {
-            const troubleData = this.troubleSlots[nextPos];
-            const troublePos = troubleData.to;
-            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
-            await this.animateToken(this.currentPlayer, nextPos, troublePos);
-            nextPos = troublePos;
-            this.playerPositions[this.currentPlayer] = nextPos;
-          }
-
           if (this.playerPositions[this.currentPlayer] >= 50) {
-            console.log(`Player ${this.currentPlayer} (${this.playerNames[this.currentPlayer]}) reached slot 50`);
-            this.showVictoryModal(this.playerNames[this.currentPlayer]);
-            console.log(`Removing token for ${this.playerNames[this.currentPlayer]}`);
+            this.showModal('Victory!', `${this.playerNames[this.currentPlayer]} wins!`);
             this.playerTokens[this.currentPlayer].remove();
             this.playerTokens[this.currentPlayer] = null;
             this.activePlayers[this.currentPlayer] = false;
-            await new Promise(resolve => setTimeout(resolve, 500));
             if (!this.activePlayers.includes(true)) {
-              console.log('No active players remaining, showing game over');
               this.showModal('Game Over', 'Game Over! All players have finished.', [
                 {
                   text: 'OK',
@@ -1053,7 +880,7 @@
           await this.renderPlayer();
           this.pendingRoll = null;
           this.targetPosition = null;
-          this.hideDice();
+          this.hideDice(); // Hide the dice after the move
           this.clearHighlights();
           this.diceResult.textContent = `🎲 Rolled: --`;
           console.log('After move, reset Pending Roll and Target Position');
@@ -1072,14 +899,12 @@
             this.showModal('Game Over', 'No active players remaining.');
             return;
           }
-          let previousPlayer = this.currentPlayer;
           do {
             this.currentPlayer = (this.currentPlayer + 1) % 4;
           } while (!this.activePlayers[this.currentPlayer] && this.activePlayers.includes(true));
           this.turnDisplay.textContent = `🎯 ${this.playerNames[this.currentPlayer]}'s turn (Player ${this.currentPlayer + 1})`;
           this.updateButtonState();
-          this.updateRollButtonLabel();
-          console.log(`Turn switched from Player ${previousPlayer + 1} (${this.playerNames[previousPlayer]}) to Player ${this.currentPlayer + 1} (${this.playerNames[this.currentPlayer]})`);
+          console.log(`Next turn: Player ${this.currentPlayer + 1}`);
         } catch (error) {
           console.error('Error in nextTurn:', error.message, error.stack);
           this.showModal('Error', 'Failed to advance to the next turn. Please reset the game.');
@@ -1096,14 +921,12 @@
           this.playerTokens.forEach(token => token?.remove());
           this.playerTokens = [null, null, null, null];
           this.clearHighlights();
-          this.hideDice();
+          this.hideDice(); // Hide the dice on reset
           this.renderPlayer();
           this.card.style.display = 'none';
           this.diceResult.textContent = '';
           this.turnDisplay.textContent = '🎯 Player 1\'s turn';
           this.updateButtonState();
-          this.updateRollButtonLabel();
-          this.closeVictoryModal();
           console.log('Game reset: Pending Roll and Target Position cleared');
         } catch (error) {
           console.error('Error in resetGame:', error.message, error.stack);
@@ -1117,7 +940,6 @@
       try {
         const game = new Game();
         if (game.board) {
-          console.log('Board found, initializing board...');
           game.initBoard();
           window.game = game;
           game.renderPlayer();
@@ -1125,14 +947,13 @@
         } else {
           console.error('Game initialization failed: board element missing');
           document.getElementById('loading').textContent = 'Error: Board element missing.';
-          document.getElementById('loading').style.display = 'block';
         }
       } catch (error) {
         console.error('Error during initialization:', error.message, error.stack);
         document.getElementById('loading').textContent = 'Error loading game. Please refresh.';
-        document.getElementById('loading').style.display = 'block';
       }
     });
   </script>
 </body>
 </html>
+
