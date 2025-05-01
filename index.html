@@ -22,6 +22,8 @@
       margin: 20px auto;
       width: max-content;
       position: relative;
+      min-height: 470px; /* Ensure board is visible */
+      border: 2px solid red; /* Debugging border */
     }
     .cell {
       background-color: lightgray;
@@ -60,8 +62,8 @@
       left: 2px;
       color: green;
       text-align: left;
-      width: 80px; /* Ensure text wraps within cell */
-      line-height: 12px; /* Adjust line spacing for readability */
+      width: 80px;
+      line-height: 12px;
     }
     .chute { background-color: #fdd4d4 !important; }
     .chute::after {
@@ -140,6 +142,11 @@
       margin: 10px 0 5px 0;
       font-size: 14px;
     }
+    #loading {
+      margin: 20px;
+      font-size: 18px;
+      color: #333;
+    }
     /* Modal styles */
     #gameModal {
       display: none;
@@ -169,7 +176,7 @@
     #gameModalContent p {
       margin: 0 0 20px 0;
       font-size: 14px;
-      white-space: pre-wrap; /* Preserve line breaks */
+      white-space: pre-wrap;
     }
     .modal-buttons {
       display: flex;
@@ -199,6 +206,7 @@
       #board {
         grid-template-columns: repeat(10, 60px);
         grid-template-rows: repeat(5, 60px);
+        min-height: 310px; /* Adjusted for smaller cells */
       }
       .cell {
         width: 60px;
@@ -234,6 +242,7 @@
 </head>
 <body>
   <h1>Paths of Justice</h1>
+  <div id="loading">Loading...</div>
   <div style="display: flex; justify-content: center; align-items: flex-start; gap: 40px;">
     <div id="playerSelection" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
       <h3>Players</h3>
@@ -286,7 +295,6 @@
   <div style="margin-top: 20px;">
     <div class="card" id="card" style="display:none;" role="alert"></div>
   </div>
-  <!-- Reusable modal for all alerts -->
   <div id="gameModal" role="dialog" aria-labelledby="gameModalTitle" aria-modal="true">
     <div id="gameModalContent">
       <h3 id="gameModalTitle"></h3>
@@ -297,6 +305,13 @@
   <script>
     class Game {
       constructor() {
+        console.log('Game constructor called');
+        this.board = document.getElementById('board');
+        if (!this.board) {
+          console.error('Board element not found!');
+          this.showModal('Error', 'Game board not found. Please check the HTML.');
+          return;
+        }
         this.playerPositions = [1, 1, 1, 1];
         this.currentPlayer = 0;
         this.pendingRoll = null;
@@ -310,7 +325,6 @@
           'Marcus – All his friends are doing it, and that’s how he’s learning what’s “normal.” He’s picking up habits from the people around him. (Social Learning Theory)',
           'Elena – She sees how unfair the system is, especially for people who look like her. She wants change but faces constant obstacles. (Conflict Theory)'
         ];
-        this.board = document.getElementById('board');
         this.positionsDisplay = document.getElementById('positions');
         this.turnDisplay = document.getElementById('turnDisplay');
         this.diceResult = document.getElementById('diceResult');
@@ -318,7 +332,7 @@
         this.rollButton = document.querySelector('button[onclick="game.rollDice()"]');
         this.cells = {};
         this.playerTokens = [null, null, null, null];
-        this.cellSize = 94; // Cell width/height (90px + 4px gap)
+        this.cellSize = 94;
         this.ladders = { 4: 18, 11: 26, 29: 39 };
         this.chutes = { 22: 11, 36: 17, 45: 31 };
         this.cards = {
@@ -333,14 +347,12 @@
           42: { text: "You earn a scholarship—huge boost! Move ahead 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         };
-        // Modal elements
         this.gameModal = document.getElementById('gameModal');
         this.gameModalTitle = document.getElementById('gameModalTitle');
         this.gameModalDescription = document.getElementById('gameModalDescription');
         this.gameModalButtons = document.getElementById('gameModalButtons');
-        this.currentJoinIndex = null; // To track which player is being joined
+        this.currentJoinIndex = null;
 
-        // Add ESC key support for closing modals
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape' && this.gameModal.style.display === 'flex') {
             this.gameModal.style.display = 'none';
@@ -348,7 +360,6 @@
           }
         });
 
-        // Add overlay click to close modal
         this.gameModal.addEventListener('click', (e) => {
           if (e.target === this.gameModal) {
             this.gameModal.style.display = 'none';
@@ -357,11 +368,10 @@
         });
       }
 
-      // Reusable modal function
       showModal(title, message, buttons = [{ text: 'OK', class: 'modal-button-ok', onClick: () => this.gameModal.style.display = 'none' }]) {
         this.gameModalTitle.textContent = title;
         this.gameModalDescription.textContent = message;
-        this.gameModalButtons.innerHTML = ''; // Clear existing buttons
+        this.gameModalButtons.innerHTML = '';
 
         buttons.forEach(button => {
           const btn = document.createElement('button');
@@ -375,12 +385,15 @@
         });
 
         this.gameModal.style.display = 'flex';
-        this.gameModalButtons.querySelector('button').focus(); // Focus the first button
+        this.gameModalButtons.querySelector('button').focus();
       }
 
       initBoard() {
+        console.log('Initializing board...');
         try {
+          document.getElementById('loading').style.display = 'none';
           for (let i = 1; i <= 50; i++) {
+            console.log(`Creating cell ${i}`);
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.id = `cell-${i}`;
@@ -439,10 +452,10 @@
           .map((pos, idx) => (this.activePlayers[idx] && pos === position ? idx : -1))
           .filter(idx => idx !== -1);
         const playerCount = playersAtPosition.length;
-        if Ascertain if (playerCount <= 1) return 0;
+        if (playerCount <= 1) return 0;
 
         const indexInCell = playersAtPosition.indexOf(playerIndex);
-        const offsetStep = 15;
+        const offsetStep = window.innerWidth <= 600 ? 10 : 15;
         return (indexInCell - (playerCount - 1) / 2) * offsetStep;
       }
 
@@ -450,41 +463,13 @@
         return new Promise(resolve => {
           const token = this.playerTokens[playerIndex];
           if (!token || fromPos === toPos) {
-            console.log(`Animation skipped for Player ${playerIndex + 1}: fromPos=${fromPos}, toPos=${toPos}`);
             resolve();
             return;
           }
-
-          const fromCoords = this.getCellCoordinates(fromPos);
-          const toCoords = this.getCellCoordinates(toPos);
-          const dx = toCoords.x - fromCoords.x;
-          const dy = toCoords.y - fromCoords.y;
-
-          const fromOffset = this.getTokenOffset(playerIndex, fromPos);
-          const toOffset = this.getTokenOffset(playerIndex, toPos);
-
-          console.log(`Animating Player ${playerIndex + 1} from ${fromPos} to ${toPos}, dx=${dx}, dy=${dy}, fromOffset=${fromOffset}, toOffset=${toOffset}`);
-
           this.cells[toPos].appendChild(token);
-
-          token.style.transform = `translate(${dx - 50 + fromOffset}%, ${dy - 50}%)`;
-
-          const onTransitionEnd = () => {
-            token.removeEventListener('transitionend', onTransitionEnd);
-            clearTimeout(timeout);
-            token.style.transform = `translate(-50%, -50%) translateX(${toOffset}px)`;
-            console.log(`Animation completed for Player ${playerIndex + 1} to position ${toPos}`);
-            resolve();
-          };
-
-          const timeout = setTimeout(() => {
-            token.removeEventListener('transitionend', onTransitionEnd);
-            token.style.transform = `translate(-50%, -50%) translateX(${toOffset}px)`;
-            console.warn(`Animation timeout for Player ${playerIndex + 1}, forcing completion to position ${toPos}`);
-            resolve();
-          }, 1000);
-
-          token.addEventListener('transitionend', onTransitionEnd, { once: true });
+          const offset = this.getTokenOffset(playerIndex, toPos);
+          token.style.transform = `translate(-50%, -50%) translateX(${offset}px)`;
+          setTimeout(resolve, 300); // Simplified animation
         });
       }
 
@@ -533,7 +518,6 @@
             return;
           }
 
-          // Show modal with player info
           this.currentJoinIndex = playerIndex;
           this.showModal(
             `${this.playerNames[playerIndex]}'s Profile`,
@@ -648,7 +632,7 @@
 
             if (newPos !== nextPos) {
               await this.animateToken(this.currentPlayer, nextPos, newPos);
-              this.playerPositions[this.currentPlayer] = newPos;
+              this.playerPositions[this.currentPlayer] = Inferno newPos;
               await this.renderPlayer();
             } else {
               console.log(`No position change after card effect, proceeding`);
@@ -694,6 +678,10 @@
 
       nextTurn() {
         try {
+          if (!this.activePlayers.includes(true)) {
+            this.showModal('Game Over', 'No active players remaining.');
+            return;
+          }
           do {
             this.currentPlayer = (this.currentPlayer + 1) % 4;
           } while (!this.activePlayers[this.currentPlayer] && this.activePlayers.includes(true));
@@ -727,18 +715,23 @@
       }
     }
 
-    window.onload = function () {
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('DOM loaded, initializing game...');
       try {
         const game = new Game();
-        game.initBoard();
-        window.game = game;
-        game.renderPlayer();
-        game.updateButtonState();
+        if (game.board) {
+          game.initBoard();
+          window.game = game;
+          game.renderPlayer();
+          game.updateButtonState();
+        } else {
+          console.error('Game initialization failed: board element missing');
+        }
       } catch (error) {
-        console.error('Error on window.onload:', error.message, error.stack);
-        game.showModal('Error', 'Failed to initialize the game. Please refresh the page.');
+        console.error('Error during initialization:', error.message, error.stack);
+        document.getElementById('loading').textContent = 'Error loading game. Please refresh.';
       }
-    };
+    });
   </script>
 </body>
 </html>
