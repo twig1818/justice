@@ -256,7 +256,8 @@
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
-            cell.setAttribute('aria-label', filos`Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cards[i] ? ', draw card' : ''}`);
+            // Fixed syntax for aria-label with proper template literal
+            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cards[i] ? ', draw card' : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.addEventListener('click', () => this.handleCellClick(i));
@@ -292,7 +293,7 @@
             this.board.appendChild(cell);
           }
         } catch (error) {
-          console.error('Error in initBoard:', error);
+          console.error('Error in initBoard:', error.message, error.stack);
           alert('Failed to initialize the game board. Please refresh the page.');
         }
       }
@@ -387,7 +388,7 @@
           });
           this.positionsDisplay.textContent = positionsText ? positionsText.slice(0, -3) : 'No players';
         } catch (error) {
-          console.error('Error in renderPlayer:', error);
+          console.error('Error in renderPlayer:', error.message, error.stack);
           alert('Failed to render players. Please reset the game.');
         }
       }
@@ -404,7 +405,6 @@
             return;
           }
           this.activePlayers[playerIndex] = true;
-          // Show alert with player name and description
           alert(`${this.playerNames[playerIndex]} joined the game!\n\n${this.playerDescriptions[playerIndex]}`);
           this.renderPlayer();
           this.updateButtonState();
@@ -412,7 +412,7 @@
             this.nextTurn();
           }
         } catch (error) {
-          console.error('Error in joinGame:', error);
+          console.error('Error in joinGame:', error.message, error.stack);
           alert('Failed to join the game. Please refresh the page.');
         }
       }
@@ -444,7 +444,7 @@
           this.targetPosition = Math.min(50, currentPos + roll);
           this.highlightTargetCell(this.targetPosition);
         } catch (error) {
-          console.error('Error in rollDice:', error);
+          console.error('Error in rollDice:', error.message, error.stack);
           alert('Failed to roll the dice. Please reset the game.');
         }
       }
@@ -527,7 +527,7 @@
           this.diceResult.textContent = `🎲 Rolled: --`;
           this.nextTurn();
         } catch (error) {
-          console.error('Error in handleCellClick:', error);
+          console.error('Error in handleCellClick:', error.message, error.stack);
           alert('An error occurred during the move. Please reset the game.');
         }
       }
@@ -540,7 +540,7 @@
           this.turnDisplay.textContent = `🎯 ${this.playerNames[this.currentPlayer]}'s turn (Player ${this.currentPlayer + 1})`;
           this.updateButtonState();
         } catch (error) {
-          console.error('Error in nextTurn:', error);
+          console.error('Error in nextTurn:', error.message, error.stack);
           alert('Failed to advance to the next turn. Please reset the game.');
         }
       }
@@ -561,7 +561,7 @@
           this.turnDisplay.textContent = '🎯 Player 1\'s turn';
           this.updateButtonState();
         } catch (error) {
-          console.error('Error in resetGame:', error);
+          console.error('Error in resetGame:', error.message, error.stack);
           alert('Failed to reset the game. Please refresh the page.');
         }
       }
@@ -575,7 +575,7 @@
         game.renderPlayer();
         game.updateButtonState();
       } catch (error) {
-        console.error('Error on window.onload:', error);
+        console.error('Error on window.onload:', error.message, error.stack);
         alert('Failed to initialize the game. Please refresh the page.');
       }
     };
