@@ -82,7 +82,7 @@
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 10px; /* Adjusted for readability */
+      font-size: 10px;
       color: #333;
       padding: 2px 4px;
       font-weight: bold;
@@ -365,17 +365,31 @@
           40: { to: 28, label: "Social Learning Chute to 28", message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down to 28!" },
           47: { to: 35, label: "Conflict Theory Chute to 35", message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down to 35!" }
         };
-        this.cards = {
-          6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 1); } },
-          10: { text: "People start calling you a troublemaker. You lose motivation. Go back 3 spaces.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
-          15: { text: "You meet someone who really believes in you. Move ahead 2 spaces.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
-          19: { text: "You got profiled by the police for no reason. Go back to space 10.", effect: function (game) { game.playerPositions[game.currentPlayer] = 10; } },
-          23: { text: "You do some community service and gain confidence. Move ahead 1 space.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 1); } },
-          28: { text: "Your family hits a rough patch. You're distracted. Move back 2.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
-          33: { text: "You're surrounded by bad influences. You slip up. Move back 1.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 1); } },
-          37: { text: "Your wealthy family gets you out of trouble. Move ahead 4.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
-          48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
-        };
+        // Define a pool of random cards tied to the theories
+        this.cardPool = [
+          // Strain Theory Cards
+          { theory: "Strain Theory", text: "A mentor helps you manage stress from life's pressures. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
+          { theory: "Strain Theory", text: "You secure a part-time job to ease financial strain. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
+          { theory: "Strain Theory", text: "The pressure to succeed leads you to a risky decision. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
+          { theory: "Strain Theory", text: "Financial strain causes you to miss an opportunity. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
+          // Labeling Theory Cards
+          { theory: "Labeling Theory", text: "You prove the negative labels wrong and gain community support. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
+          { theory: "Labeling Theory", text: "A teacher sees your potential beyond the labels. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
+          { theory: "Labeling Theory", text: "Society's labels make you doubt yourself, causing a setback. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
+          { theory: "Labeling Theory", text: "A false label leads to unfair treatment. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
+          // Social Learning Theory Cards
+          { theory: "Social Learning Theory", text: "You learn a valuable skill from a positive role model. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
+          { theory: "Social Learning Theory", text: "A friend inspires you to make better choices. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
+          { theory: "Social Learning Theory", text: "You pick up a bad habit from peers. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
+          { theory: "Social Learning Theory", text: "Negative influences lead you astray. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
+          // Conflict Theory Cards
+          { theory: "Conflict Theory", text: "You organize a protest and gain allies against an unfair system. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
+          { theory: "Conflict Theory", text: "A community leader helps you navigate systemic barriers. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
+          { theory: "Conflict Theory", text: "Systemic inequality blocks your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
+          { theory: "Conflict Theory", text: "Unfair treatment by authorities sets you back. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } }
+        ];
+        // Define which cells are card cells (same positions as before)
+        this.cardCells = [6, 10, 15, 19, 23, 28, 33, 37, 48];
         this.currentJoinIndex = null;
         this.initModalElements();
         this.setupEventListeners();
@@ -446,7 +460,7 @@
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
-            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cards[i] ? ', draw card' : ''}`);
+            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.addEventListener('click', () => this.handleCellClick(i));
@@ -486,17 +500,17 @@
               cell.appendChild(label);
               cell.appendChild(tooltip);
             }
-            if (this.cards[i]) {
+            if (this.cardCells.includes(i)) {
               cell.classList.add('draw-card');
               const wrapper = document.createElement('div');
               wrapper.className = 'info-tooltip';
               const infoButton = document.createElement('button');
               infoButton.className = 'info-button';
-              infoButton.textContent = 'Draw a Card'; // Updated text
+              infoButton.textContent = 'Draw a Card';
               infoButton.setAttribute('aria-label', `Card info for cell ${i}`);
               const tooltip = document.createElement('div');
               tooltip.className = 'tooltip-content';
-              tooltip.textContent = this.cards[i].text;
+              tooltip.textContent = 'Draw a Card'; // Tooltip also shows "Draw a Card"
               wrapper.appendChild(infoButton);
               wrapper.appendChild(tooltip);
               cell.appendChild(wrapper);
@@ -508,6 +522,12 @@
           document.getElementById('loading').textContent = 'Error: Failed to initialize the game board.';
           this.showModal('Error', 'Failed to initialize the game board. Please refresh the page.');
         }
+      }
+
+      // Helper method to draw a random card from the pool
+      drawRandomCard() {
+        const randomIndex = Math.floor(Math.random() * this.cardPool.length);
+        return this.cardPool[randomIndex];
       }
 
       getCellCoordinates(position) {
@@ -693,9 +713,9 @@
             this.playerPositions[this.currentPlayer] = nextPos;
           }
 
-          if (this.cards[nextPos]) {
-            const cardData = this.cards[nextPos];
-            console.log(`Card effect at position ${nextPos}: ${cardData.text}`);
+          if (this.cardCells.includes(nextPos)) {
+            const cardData = this.drawRandomCard();
+            console.log(`Drew card at position ${nextPos}: ${cardData.text}`);
             const prevPos = this.playerPositions[this.currentPlayer];
             cardData.effect(this);
             const newPos = this.playerPositions[this.currentPlayer];
