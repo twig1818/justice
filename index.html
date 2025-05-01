@@ -87,6 +87,12 @@
       padding: 2px 4px;
       font-weight: bold;
     }
+    .trouble { background-color: #ffcccb !important; } /* Light red for trouble slots */
+    .trouble img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .tooltip-content {
       visibility: hidden;
       background-color: #333;
@@ -451,6 +457,10 @@
           40: { to: 28, label: "Social Learning Chute to 28", message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down to 28!" },
           47: { to: 35, label: "Conflict Theory Chute to 35", message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down to 35!" }
         };
+        this.troubleSlots = {
+          17: { to: 1, message: "🔴 Social Learning Theory: You saw your friends spray painting and thought it was okay, but you got caught! Go back to the start line." },
+          31: { to: 1, message: "🔴 Labeling Theory: You were labeled a troublemaker after spray painting, leading to more trouble! Go back to the start line." }
+        };
         this.cardPool = [
           { theory: "Strain Theory", text: "A mentor helps you manage stress from life's pressures. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           { theory: "Strain Theory", text: "You secure a part-time job to ease financial strain. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
@@ -545,7 +555,7 @@
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
-            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}`);
+            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.removeEventListener('click', this.handleCellClickBound);
@@ -554,11 +564,13 @@
 
             if (i === 1) {
               cell.classList.add('start');
-              // Updated Start Line GIF
               cell.innerHTML = `<img src="https://media.giphy.com/media/27njMqCBPc2SQ/giphy.gif" alt="Start Line">`;
             } else if (i === 50) {
               cell.classList.add('end');
               cell.innerHTML = `<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Finish Line">`;
+            } else if (i === 17 || i === 31) {
+              cell.classList.add('trouble');
+              cell.innerHTML = `<img src="https://media.giphy.com/media/4GMtanwbPY0xSpy2V5/giphy.gif" alt="Trouble: Spray Paint">`;
             } else {
               cell.innerHTML = `<div>${i}</div>`;
             }
@@ -841,6 +853,14 @@
             this.showModal('Chute!', `${chuteData.message}\nMoving to position ${chutePos}!`);
             await this.animateToken(this.currentPlayer, nextPos, chutePos);
             nextPos = chutePos;
+            this.playerPositions[this.currentPlayer] = nextPos;
+          }
+          else if (this.troubleSlots[nextPos]) {
+            const troubleData = this.troubleSlots[nextPos];
+            const troublePos = troubleData.to;
+            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
+            await this.animateToken(this.currentPlayer, nextPos, troublePos);
+            nextPos = troublePos;
             this.playerPositions[this.currentPlayer] = nextPos;
           }
 
