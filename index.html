@@ -87,7 +87,7 @@
       padding: 2px 4px;
       font-weight: bold;
     }
-    .trouble { background-color: #ffcccb !important; }
+    .trouble { background-color: #ffcccb !important; position: relative; }
     .trouble img {
       width: 100%;
       height: 100%;
@@ -118,6 +118,10 @@
       opacity: 1;
     }
     .ladder:hover .tooltip-content {
+      visibility: visible;
+      opacity: 1;
+    }
+    .trouble:hover .tooltip-content {
       visibility: visible;
       opacity: 1;
     }
@@ -555,7 +559,9 @@
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
-            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' : ''}`);
+            // Include trouble slot message in aria-label for accessibility
+            const troubleMessage = this.troubleSlots[i] ? `, ${this.troubleSlots[i].message}` : '';
+            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.removeEventListener('click', this.handleCellClickBound);
@@ -570,7 +576,12 @@
               cell.innerHTML = `<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Finish Line">`;
             } else if (i === 17 || i === 31) {
               cell.classList.add('trouble');
+              const troubleData = this.troubleSlots[i];
               cell.innerHTML = `<img src="https://media.giphy.com/media/4GMtanwbPY0xSpy2V5/giphy.gif" alt="Trouble: Spray Paint">`;
+              const tooltip = document.createElement('div');
+              tooltip.className = 'tooltip-content';
+              tooltip.textContent = troubleData.message;
+              cell.appendChild(tooltip);
             } else {
               cell.innerHTML = `<div>${i}</div>`;
             }
@@ -882,7 +893,6 @@
             this.card.style.display = 'none';
           }
 
-          // Check for trouble slots after all movements (initial move, ladder, chute, card)
           if (this.troubleSlots[nextPos]) {
             const troubleData = this.troubleSlots[nextPos];
             const troublePos = troubleData.to;
