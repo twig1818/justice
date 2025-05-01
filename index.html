@@ -43,7 +43,7 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%); /* Default centering */
       transition: transform 0.3s ease-in-out;
       z-index: 10;
     }
@@ -289,6 +289,21 @@
         return { x, y };
       }
 
+      getTokenOffset(playerIndex, position) {
+        // Count players at this position
+        const playersAtPosition = this.playerPositions
+          .map((pos, idx) => (this.activePlayers[idx] && pos === position ? idx : -1))
+          .filter(idx => idx !== -1);
+        const playerCount = playersAtPosition.length;
+        if (playerCount <= 1) return 0; // No offset needed for single player
+
+        // Assign offset based on player's index in the list of players at this position
+        const indexInCell = playersAtPosition.indexOf(playerIndex);
+        // Spread tokens horizontally: e.g., [-15, 0, 15] for 3 players
+        const offsetStep = 15; // Pixels between tokens
+        return (indexInCell - (playerCount - 1) / 2) * offsetStep;
+      }
+
       animateToken(playerIndex, fromPos, toPos) {
         return new Promise(resolve => {
           const token = this.playerTokens[playerIndex];
@@ -299,13 +314,17 @@
           const dx = toCoords.x - fromCoords.x;
           const dy = toCoords.y - fromCoords.y;
 
-          // Apply translation for animation
-          token.style.transform = `translate(${dx - 50}%, ${dy - 50}%)`;
+          // Get offsets for from and to positions
+          const fromOffset = this.getTokenOffset(playerIndex, fromPos);
+          const toOffset = this.getTokenOffset(playerIndex, toPos);
+
+          // Animate to new position with offset
+          token.style.transform = `translate(${dx - 50 + fromOffset}%, ${dy - 50}%)`;
           token.addEventListener('transitionend', () => {
             // Move token to new cell
             this.cells[toPos].appendChild(token);
-            // Reset transform to center in new cell
-            token.style.transform = 'translate(-50%, -50%)';
+            // Apply new offset for final position
+            token.style.transform = `translate(-50%, -50%) translateX(${toOffset}px)`;
             resolve();
           }, { once: true });
         });
@@ -330,8 +349,10 @@
             const token = this.playerTokens[index];
             if (token && token.parentNode !== this.cells[pos]) {
               this.cells[pos].appendChild(token);
-              token.style.transform = 'translate(-50%, -50%)';
             }
+            // Apply offset for players sharing the same cell
+            const offset = this.getTokenOffset(index, pos);
+            token.style.transform = `translate(-50%, -50%) translateX(${offset}px)`;
             positionsText += `${this.playerNames[index]}: ${pos} | `;
           }
         });
@@ -379,11 +400,9 @@
         const currentPos = this.playerPositions[this.currentPlayer];
         let nextPos = Math.min(50, currentPos + this.pendingRoll);
 
-        // Animate to rolled position
         await this.animateToken(this.currentPlayer, currentPos, nextPos);
         this.playerPositions[this.currentPlayer] = nextPos;
 
-        // Handle ladder
         if (this.ladders[nextPos]) {
           const ladderPos = this.ladders[nextPos];
           alert('🟢 You climbed a ladder!');
@@ -391,7 +410,6 @@
           nextPos = ladderPos;
           this.playerPositions[this.currentPlayer] = nextPos;
         }
-        // Handle chute
         else if (this.chutes[nextPos]) {
           const chutePos = this.chutes[nextPos];
           alert('🔴 You slid down a chute!');
@@ -400,7 +418,6 @@
           this.playerPositions[this.currentPlayer] = nextPos;
         }
 
-        // Handle card
         if (this.cards[nextPos]) {
           const cardData = this.cards[nextPos];
           cardData.effect = cardData.effect.bind({ playerIndex: this.currentPlayer, playerPositions: this.playerPositions });
@@ -416,7 +433,6 @@
           this.card.style.display = 'none';
         }
 
-        // Check for win
         if (this.playerPositions[this.currentPlayer] >= 50) {
           alert(`${this.playerNames[this.currentPlayer]} wins!`);
           this.playerTokens[this.currentPlayer].remove();
@@ -469,4 +485,3 @@
   </script>
 </body>
 </html>
-
