@@ -64,7 +64,18 @@
       width: 80px;
       line-height: 12px;
     }
-    .chute { background-color: #fdd4d4 !important; }
+    .chute { background-color: #fdd4d4 !important; position: relative; }
+    .chute .chute-label {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      font-size: 10px;
+      font-weight: bold;
+      color: red;
+      text-align: left;
+      width: 80px;
+      line-height: 12px;
+    }
     .chute::after {
       content: "🔴 Bad Choice! Move Down";
       position: absolute;
@@ -235,6 +246,13 @@
         font-size: 12px;
         padding: 6px 12px;
       }
+      .chute-label {
+        font-size: 8px;
+        width: 50px;
+      }
+      .chute::after {
+        font-size: 8px;
+      }
     }
   </style>
 </head>
@@ -332,12 +350,11 @@
         this.playerTokens = [null, null, null, null];
         this.cellSize = 94;
         this.ladders = { 4: 18, 11: 26, 29: 39 };
-        // Updated chutes with theory-based descriptions
         this.chutes = {
-          25: { to: 14, message: "🔴 Strain Theory: You felt overwhelmed by life's pressures and made a desperate choice to get ahead. It backfired—slide down!" },
-          30: { to: 20, message: "🔴 Labeling Theory: Society labeled you as a troublemaker after a small mistake, and the stigma made you slip up again—slide down!" },
-          40: { to: 28, message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down!" },
-          47: { to: 35, message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down!" }
+          25: { to: 14, label: "Strain Theory Chute", message: "🔴 Strain Theory: You felt overwhelmed by life's pressures and made a desperate choice to get ahead. It backfired—slide down!" },
+          30: { to: 20, label: "Labeling Theory Chute", message: "🔴 Labeling Theory: Society labeled you as a troublemaker after a small mistake, and the stigma made you slip up again—slide down!" },
+          40: { to: 28, label: "Social Learning Chute", message: "🔴 Social Learning Theory: You copied a risky behavior from those around you, thinking it was okay. Wrong move—slide down!" },
+          47: { to: 35, label: "Conflict Theory Chute", message: "🔴 Conflict Theory: The system treated you unfairly because of your background, setting you up to fail—slide down!" }
         };
         this.cards = {
           6: { text: "You forgot to pay rent and things got rough. Move back 1 space.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 1); } },
@@ -438,7 +455,26 @@
             }
 
             if (this.ladders[i]) cell.classList.add('ladder');
-            if (this.chutes[i]) cell.classList.add('chute');
+            if (this.chutes[i]) {
+              cell.classList.add('chute');
+              const chuteData = this.chutes[i];
+              const wrapper = document.createElement('div');
+              wrapper.className = 'info-tooltip';
+              const label = document.createElement('div');
+              label.className = 'chute-label';
+              label.textContent = chuteData.label;
+              const infoButton = document.createElement('button');
+              infoButton.className = 'info-button';
+              infoButton.textContent = 'ℹ️';
+              infoButton.setAttribute('aria-label', `Chute info for cell ${i}`);
+              const tooltip = document.createElement('div');
+              tooltip.className = 'tooltip-content';
+              tooltip.textContent = chuteData.message;
+              wrapper.appendChild(label);
+              wrapper.appendChild(infoButton);
+              wrapper.appendChild(tooltip);
+              cell.appendChild(wrapper);
+            }
             if (this.cards[i]) {
               cell.classList.add('draw-card');
               const wrapper = document.createElement('div');
