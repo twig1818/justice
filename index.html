@@ -213,14 +213,17 @@
         }
         if (ladders[i]) cell.classList.add('ladder');
         if (chutes[i]) cell.classList.add('chute');
-        if (cards[i]) {
+
+        // Add draw-card to all odd-numbered squares
+        if (i % 2 === 1) {
           cell.classList.add('draw-card');
+          const cardText = cards[i]?.text || "This is a life event. Make a choice and see what happens.";
           const infoButton = document.createElement('button');
           infoButton.className = 'info-button';
           infoButton.textContent = 'ℹ️';
           const tooltip = document.createElement('div');
           tooltip.className = 'tooltip-content';
-          tooltip.textContent = cards[i].text;
+          tooltip.textContent = cardText;
           const wrapper = document.createElement('div');
           wrapper.className = 'info-tooltip';
           wrapper.appendChild(infoButton);
@@ -232,6 +235,7 @@
           };
           cell.appendChild(wrapper);
         }
+
         board.appendChild(cell);
       }
       function renderPlayer() {
