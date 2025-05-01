@@ -318,7 +318,6 @@
     </div>
     <div>
       <div id="board" role="grid" aria-live="polite"></div>
-      <!-- Moved Player positions here -->
       <p id="positionsDisplay">Player positions: <span id="positions">No players</span></p>
     </div>
   </div>
@@ -668,10 +667,12 @@
           }
           this.card.style.display = 'none';
           const roll = Math.floor(Math.random() * 6) + 1;
+          this.pendingRoll = roll;
           this.diceResult.textContent = `🎲 Rolled: ${roll}. Click on the highlighted cell to move!`;
           const currentPos = this.playerPositions[this.currentPlayer];
           this.targetPosition = Math.min(50, currentPos + roll);
           this.highlightTargetCell(this.targetPosition);
+          console.log(`Rolled dice: ${roll}, Current Position: ${currentPos}, Target Position: ${this.targetPosition}, Pending Roll: ${this.pendingRoll}`);
         } catch (error) {
           console.error('Error in rollDice:', error.message, error.stack);
           this.showModal('Error', 'Failed to roll the dice. Please reset the game.');
@@ -679,12 +680,16 @@
       }
 
       async handleCellClick(position) {
+        console.log(`handleCellClick called with position: ${position}, Pending Roll: ${this.pendingRoll}, Target Position: ${this.targetPosition}`);
+        
         if (this.pendingRoll === null) {
+          console.log('Pending roll is null, showing "Please roll the dice first!" message');
           this.showModal('Notice', 'Please roll the dice first!');
           return;
         }
 
         if (position !== this.targetPosition) {
+          console.log(`Clicked position ${position} does not match target position ${this.targetPosition}`);
           this.showModal('Notice', `You must move to cell ${this.targetPosition}!`);
           return;
         }
@@ -765,6 +770,7 @@
           this.targetPosition = null;
           this.clearHighlights();
           this.diceResult.textContent = `🎲 Rolled: --`;
+          console.log('After move, reset Pending Roll and Target Position');
           this.nextTurn();
         } catch (error) {
           console.error('Error in handleCellClick:', error.message, error.stack);
@@ -783,6 +789,7 @@
           } while (!this.activePlayers[this.currentPlayer] && this.activePlayers.includes(true));
           this.turnDisplay.textContent = `🎯 ${this.playerNames[this.currentPlayer]}'s turn (Player ${this.currentPlayer + 1})`;
           this.updateButtonState();
+          console.log(`Next turn: Player ${this.currentPlayer + 1}`);
         } catch (error) {
           console.error('Error in nextTurn:', error.message, error.stack);
           this.showModal('Error', 'Failed to advance to the next turn. Please reset the game.');
@@ -804,6 +811,7 @@
           this.diceResult.textContent = '';
           this.turnDisplay.textContent = '🎯 Player 1\'s turn';
           this.updateButtonState();
+          console.log('Game reset: Pending Roll and Target Position cleared');
         } catch (error) {
           console.error('Error in resetGame:', error.message, error.stack);
           this.showModal('Error', 'Failed to reset the game. Please refresh the page.');
