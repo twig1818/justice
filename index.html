@@ -122,8 +122,7 @@
       opacity: 1;
     }
     .trouble:hover .tooltip-content {
-      visibility: visible;
-      opacity: 1;
+      visibility: visible; opacity: 1;
     }
     .start { background-color: #a8e6ff !important; }
     .end { background-color: #b9fbc0 !important; }
@@ -230,7 +229,6 @@
       background-color: #f44336;
       color: white;
     }
-    /* New styles for victory pop-up */
     #victoryModal {
       display: none;
       position: fixed;
@@ -488,7 +486,6 @@
       <div class="modal-buttons" id="gameModalButtons"></div>
     </div>
   </div>
-  <!-- New victory modal -->
   <div id="victoryModal" role="dialog" aria-labelledby="victoryModalTitle" aria-modal="true">
     <div id="victoryModalContent">
       <h2 id="victoryModalTitle"></h2>
@@ -588,6 +585,7 @@
             !this.victoryModal || !this.victoryModalTitle || !this.victoryModalDescription) {
           console.error('Modal elements not found!');
           document.getElementById('loading').textContent = 'Error: Modal elements not found.';
+          document.getElementById('loading').style.display = 'block';
         }
       }
 
@@ -624,6 +622,7 @@
         if (!this.gameModal || !this.gameModalTitle || !this.gameModalDescription || !this.gameModalButtons) {
           console.error('Cannot show modal: modal elements not initialized');
           document.getElementById('loading').textContent = 'Error: Cannot display modal.';
+          document.getElementById('loading').style.display = 'block';
           return;
         }
         this.gameModalTitle.textContent = title;
@@ -649,8 +648,10 @@
         if (!this.victoryModal || !this.victoryModalTitle || !this.victoryModalDescription) {
           console.error('Cannot show victory modal: modal elements not initialized');
           document.getElementById('loading').textContent = 'Error: Cannot display victory modal.';
+          document.getElementById('loading').style.display = 'block';
           return;
         }
+        console.log(`Showing victory modal for ${playerName}`);
         this.victoryModalTitle.textContent = `${playerName} Wins!`;
         this.victoryModalDescription.textContent = 'You have won the game, but your journey is up to you. Continue your journey.';
         this.victoryModal.style.display = 'flex';
@@ -659,14 +660,17 @@
 
       closeVictoryModal() {
         if (this.victoryModal) {
+          console.log('Closing victory modal');
           this.victoryModal.style.display = 'none';
         }
       }
 
       initBoard() {
         console.log('Initializing board...');
+        const loadingElement = document.getElementById('loading');
         try {
-          document.getElementById('loading').style.display = 'none';
+          loadingElement.textContent = 'Loading board...';
+          loadingElement.style.display = 'block';
           this.board.innerHTML = '';
           this.cells = {};
 
@@ -686,14 +690,14 @@
 
             if (i === 1) {
               cell.classList.add('start');
-              cell.innerHTML = `<img src="https://media.giphy.com/media/27njMqCBPc2SQ/giphy.gif" alt="Start Line">`;
+              cell.innerHTML = `<div>Start</div>`; // Replaced Giphy GIF with static text
             } else if (i === 50) {
               cell.classList.add('end');
-              cell.innerHTML = `<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Finish Line">`;
+              cell.innerHTML = `<div>Finish</div>`; // Replaced Giphy GIF with static text
             } else if (i === 17 || i === 31) {
               cell.classList.add('trouble');
               const troubleData = this.troubleSlots[i];
-              cell.innerHTML = `<img src="https://media.giphy.com/media/4GMtanwbPY0xSpy2V5/giphy.gif" alt="Trouble: Spray Paint">`;
+              cell.innerHTML = `<div>Trouble</div>`; // Replaced Giphy GIF with static text
               const tooltip = document.createElement('div');
               tooltip.className = 'tooltip-content';
               tooltip.textContent = troubleData.message;
@@ -743,15 +747,19 @@
             }
             this.board.appendChild(cell);
           }
+          console.log('Board initialization complete, hiding loading message');
+          loadingElement.style.display = 'none';
         } catch (error) {
           console.error('Error in initBoard:', error.message, error.stack);
-          document.getElementById('loading').textContent = 'Error: Failed to initialize the game board.';
+          loadingElement.textContent = `Error: Failed to initialize the game board. ${error.message}`;
+          loadingElement.style.display = 'block';
           this.showModal('Error', 'Failed to initialize the game board. Please refresh the page.');
         }
       }
 
       drawRandomCard() {
         const randomIndex = Math.floor(Math.random() * this.cardPool.length);
+        console.log(`Drawing card ${randomIndex}: ${this.cardPool[randomIndex].text}`);
         return this.cardPool[randomIndex];
       }
 
@@ -868,7 +876,10 @@
                   this.activePlayers[playerIndex] = true;
                   this.renderPlayer();
                   this.updateButtonState();
-                  if (this.currentPlayer === playerIndex && !this.gameModal.style.display = 'none';
+                  if (this.currentPlayer === playerIndex && !this.activePlayers[this.currentPlayer]) {
+                    this.nextTurn();
+                  }
+                  this.gameModal.style.display = 'none';
                   this.currentJoinIndex = null;
                 }
               }
@@ -1016,12 +1027,15 @@
           }
 
           if (this.playerPositions[this.currentPlayer] >= 50) {
+            console.log(`Player ${this.currentPlayer} (${this.playerNames[this.currentPlayer]}) reached slot 50`);
             this.showVictoryModal(this.playerNames[this.currentPlayer]);
+            console.log(`Removing token for ${this.playerNames[this.currentPlayer]}`);
             this.playerTokens[this.currentPlayer].remove();
             this.playerTokens[this.currentPlayer] = null;
             this.activePlayers[this.currentPlayer] = false;
-            await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay to ensure modal displays
+            await new Promise(resolve => setTimeout(resolve, 500));
             if (!this.activePlayers.includes(true)) {
+              console.log('No active players remaining, showing game over');
               this.showModal('Game Over', 'Game Over! All players have finished.', [
                 {
                   text: 'OK',
@@ -1103,6 +1117,7 @@
       try {
         const game = new Game();
         if (game.board) {
+          console.log('Board found, initializing board...');
           game.initBoard();
           window.game = game;
           game.renderPlayer();
@@ -1110,10 +1125,12 @@
         } else {
           console.error('Game initialization failed: board element missing');
           document.getElementById('loading').textContent = 'Error: Board element missing.';
+          document.getElementById('loading').style.display = 'block';
         }
       } catch (error) {
         console.error('Error during initialization:', error.message, error.stack);
         document.getElementById('loading').textContent = 'Error loading game. Please refresh.';
+        document.getElementById('loading').style.display = 'block';
       }
     });
   </script>
