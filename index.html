@@ -87,7 +87,7 @@
       padding: 2px 4px;
       font-weight: bold;
     }
-    .trouble { background-color: #ffcccb !important; } /* Light red for trouble slots */
+    .trouble { background-color: #ffcccb !important; position: relative; }
     .trouble img {
       width: 100%;
       height: 100%;
@@ -118,6 +118,10 @@
       opacity: 1;
     }
     .ladder:hover .tooltip-content {
+      visibility: visible;
+      opacity: 1;
+    }
+    .trouble:hover .tooltip-content {
       visibility: visible;
       opacity: 1;
     }
@@ -555,7 +559,9 @@
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
-            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' : ''}`);
+            // Include trouble slot message in aria-label for accessibility
+            const troubleMessage = this.troubleSlots[i] ? `, ${this.troubleSlots[i].message}` : '';
+            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.removeEventListener('click', this.handleCellClickBound);
@@ -570,7 +576,12 @@
               cell.innerHTML = `<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Finish Line">`;
             } else if (i === 17 || i === 31) {
               cell.classList.add('trouble');
+              const troubleData = this.troubleSlots[i];
               cell.innerHTML = `<img src="https://media.giphy.com/media/4GMtanwbPY0xSpy2V5/giphy.gif" alt="Trouble: Spray Paint">`;
+              const tooltip = document.createElement('div');
+              tooltip.className = 'tooltip-content';
+              tooltip.textContent = troubleData.message;
+              cell.appendChild(tooltip);
             } else {
               cell.innerHTML = `<div>${i}</div>`;
             }
@@ -847,20 +858,13 @@
             nextPos = ladderPos;
             this.playerPositions[this.currentPlayer] = nextPos;
           }
-          else if (this.chutes[nextPos]) {
+
+          if (this.chutes[nextPos]) {
             const chuteData = this.chutes[nextPos];
             const chutePos = chuteData.to;
             this.showModal('Chute!', `${chuteData.message}\nMoving to position ${chutePos}!`);
             await this.animateToken(this.currentPlayer, nextPos, chutePos);
             nextPos = chutePos;
-            this.playerPositions[this.currentPlayer] = nextPos;
-          }
-          else if (this.troubleSlots[nextPos]) {
-            const troubleData = this.troubleSlots[nextPos];
-            const troublePos = troubleData.to;
-            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
-            await this.animateToken(this.currentPlayer, nextPos, troublePos);
-            nextPos = troublePos;
             this.playerPositions[this.currentPlayer] = nextPos;
           }
 
@@ -877,8 +881,8 @@
 
             if (newPos !== nextPos) {
               await this.animateToken(this.currentPlayer, nextPos, newPos);
-              this.playerPositions[this.currentPlayer] = newPos;
-              await this.renderPlayer();
+              nextPos = newPos;
+              this.playerPositions[this.currentPlayer] = nextPos;
             } else {
               console.log(`No position change after card effect, proceeding`);
               await new Promise(resolve => setTimeout(resolve, 300));
@@ -887,6 +891,15 @@
             this.card.style.display = 'block';
           } else {
             this.card.style.display = 'none';
+          }
+
+          if (this.troubleSlots[nextPos]) {
+            const troubleData = this.troubleSlots[nextPos];
+            const troublePos = troubleData.to;
+            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
+            await this.animateToken(this.currentPlayer, nextPos, troublePos);
+            nextPos = troublePos;
+            this.playerPositions[this.currentPlayer] = nextPos;
           }
 
           if (this.playerPositions[this.currentPlayer] >= 50) {
