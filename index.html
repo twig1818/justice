@@ -282,9 +282,14 @@
       height: 100%;
       object-fit: cover;
     }
-    #drawCardStack {
+    .deck-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+    }
+    #drawCardStack, #browseCardStack {
       width: 270px; /* Matches width of cells 41–43 (3 * 90px) */
-      margin: 10px auto;
       padding: 10px;
       background-color: #fff;
       border: 2px solid #333;
@@ -292,12 +297,12 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       text-align: center;
     }
-    #drawCardStack h3 {
+    #drawCardStack h3, #browseCardStack h3 {
       font-size: 16px;
       margin: 0 0 10px 0;
       color: #333;
     }
-    #drawCardStack p {
+    #drawCardStack p, #browseCardStack p {
       font-size: 14px;
       margin: 0 0 10px 0;
       line-height: 1.4;
@@ -401,19 +406,23 @@
         width: 12px;
         height: 12px;
       }
-      #drawCardStack {
+      #drawCardStack, #browseCardStack {
         width: 180px; /* Matches 3 * 60px */
         padding: 8px;
       }
-      #drawCardStack h3 {
+      #drawCardStack h3, #browseCardStack h3 {
         font-size: 14px;
       }
-      #drawCardStack p {
+      #drawCardStack p, #browseCardStack p {
         font-size: 12px;
       }
       .card-nav-button, #drawCardButton {
         font-size: 12px;
         padding: 6px 12px;
+      }
+      .deck-container {
+        flex-direction: column;
+        gap: 10px;
       }
     }
   </style>
@@ -467,14 +476,20 @@
     </div>
     <div>
       <div id="board" role="grid" aria-live="polite"></div>
-      <div id="drawCardStack" role="region" aria-live="polite" aria-label="Draw card stack">
-        <h3 id="cardTheory"></h3>
-        <p id="cardText"></p>
-        <div class="card-nav-buttons">
-          <button class="card-nav-button" onclick="game.prevCard()" aria-label="Previous card">Previous</button>
-          <button class="card-nav-button" onclick="game.nextCard()" aria-label="Next card">Next</button>
+      <div class="deck-container">
+        <div id="drawCardStack" role="region" aria-live="polite" aria-label="Draw card stack">
+          <h3 id="cardTheory"></h3>
+          <p id="cardText"></p>
+          <button id="drawCardButton" onclick="game.drawCardFromDeck()" aria-label="Draw a card from the deck" disabled>Draw Card</button>
         </div>
-        <button id="drawCardButton" onclick="game.drawCardFromDeck()" aria-label="Draw a card from the deck" disabled>Draw Card</button>
+        <div id="browseCardStack" role="region" aria-live="polite" aria-label="Browse card stack">
+          <h3 id="browseCardTheory"></h3>
+          <p id="browseCardText"></p>
+          <div class="card-nav-buttons">
+            <button class="card-nav-button" onclick="game.prevBrowseCard()" aria-label="Previous card">Previous</button>
+            <button class="card-nav-button" onclick="game.nextBrowseCard()" aria-label="Next card">Next</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -579,13 +594,15 @@
         this.cardCells = [6, 10, 15, 23, 28, 33, 37, 48]; // Position 19 removed
         this.currentJoinIndex = null;
         this.isProcessingMove = false;
-        this.currentCardIndex = 0; // Track current card in stack
+        this.currentCardIndex = 0; // Track current card in draw deck
+        this.browseCardIndex = 0; // Track current card in browse deck
         this.isDrawCardPending = false; // Track if a card draw is pending
         this.lastCardPosition = null; // Track the position where the card draw is pending
         this.initModalElements();
         this.setupEventListeners();
         this.updateRollButtonLabel();
-        this.updateCardStack(); // Initialize card stack
+        this.updateDrawCardStack(); // Initialize draw card stack
+        this.updateBrowseCardStack(); // Initialize browse card stack
         this.initFireworks(); // Initialize fireworks canvas
       }
 
@@ -1035,7 +1052,7 @@
               this.isDrawCardPending = true;
               this.lastCardPosition = nextPos;
               this.drawCardButton.disabled = false;
-              this.updateCardStack();
+              this.updateDrawCardStack();
               this.showModal('Draw a Card', 'Please click the "Draw Card" button on the deck below to draw your card.');
             }
           } else {
@@ -1117,7 +1134,7 @@
           }
           this.card.textContent = displayText;
           this.card.style.display = 'block';
-          this.updateCardStack();
+          this.updateDrawCardStack();
           await this.renderPlayer();
         } catch (error) {
           console.error('Error in drawCardFromDeck:', error.message, error.stack);
@@ -1160,11 +1177,13 @@
           this.card.style.display = 'none';
           this.diceResult.textContent = '';
           this.turnDisplay.textContent = '🎯 Player 1\'s turn';
-          this.currentCardIndex = 0; // Reset card stack
+          this.currentCardIndex = 0; // Reset draw card stack
+          this.browseCardIndex = 0; // Reset browse card stack
           this.isDrawCardPending = false; // Reset card draw state
           this.lastCardPosition = null;
           this.drawCardButton.disabled = true;
-          this.updateCardStack();
+          this.updateDrawCardStack();
+          this.updateBrowseCardStack();
           this.canvas.style.display = 'none'; // Hide fireworks
           this.particles = [];
           this.updateButtonState();
@@ -1176,12 +1195,12 @@
         }
       }
 
-      updateCardStack() {
+      updateDrawCardStack() {
         try {
           const cardTheory = document.getElementById('cardTheory');
           const cardText = document.getElementById('cardText');
           if (!cardTheory || !cardText) {
-            console.error('Card stack elements not found!');
+            console.error('Draw card stack elements not found!');
             return;
           }
           if (this.isDrawCardPending) {
@@ -1190,30 +1209,47 @@
             cardText.textContent = card.text;
             document.getElementById('drawCardStack').setAttribute('aria-label', `Draw card stack, showing card ${this.currentCardIndex + 1} of ${this.cardPool.length}: ${card.theory}, ${card.text}`);
           } else {
-            cardTheory.textContent = 'Card Deck';
+            cardTheory.textContent = 'Draw Deck';
             cardText.textContent = 'Click "Draw Card" when prompted to draw a card.';
             document.getElementById('drawCardStack').setAttribute('aria-label', 'Draw card stack, showing cover card. Click Draw Card when prompted.');
           }
         } catch (error) {
-          console.error('Error in updateCardStack:', error.message, error.stack);
+          console.error('Error in updateDrawCardStack:', error.message, error.stack);
         }
       }
 
-      prevCard() {
+      updateBrowseCardStack() {
         try {
-          this.currentCardIndex = (this.currentCardIndex - 1 + this.cardPool.length) % this.cardPool.length;
-          this.updateCardStack();
+          const browseCardTheory = document.getElementById('browseCardTheory');
+          const browseCardText = document.getElementById('browseCardText');
+          if (!browseCardTheory || !browseCardText) {
+            console.error('Browse card stack elements not found!');
+            return;
+          }
+          const card = this.cardPool[this.browseCardIndex];
+          browseCardTheory.textContent = `Card ${this.browseCardIndex + 1} of ${this.cardPool.length}: ${card.theory}`;
+          browseCardText.textContent = card.text;
+          document.getElementById('browseCardStack').setAttribute('aria-label', `Browse card stack, showing card ${this.browseCardIndex + 1} of ${this.cardPool.length}: ${card.theory}, ${card.text}`);
         } catch (error) {
-          console.error('Error in prevCard:', error.message, error.stack);
+          console.error('Error in updateBrowseCardStack:', error.message, error.stack);
         }
       }
 
-      nextCard() {
+      prevBrowseCard() {
         try {
-          this.currentCardIndex = (this.currentCardIndex + 1) % this.cardPool.length;
-          this.updateCardStack();
+          this.browseCardIndex = (this.browseCardIndex - 1 + this.cardPool.length) % this.cardPool.length;
+          this.updateBrowseCardStack();
         } catch (error) {
-          console.error('Error in nextCard:', error.message, error.stack);
+          console.error('Error in prevBrowseCard:', error.message, error.stack);
+        }
+      }
+
+      nextBrowseCard() {
+        try {
+          this.browseCardIndex = (this.browseCardIndex + 1) % this.cardPool.length;
+          this.updateBrowseCardStack();
+        } catch (error) {
+          console.error('Error in nextBrowseCard:', error.message, error.stack);
         }
       }
     }
