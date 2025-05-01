@@ -218,6 +218,12 @@
         this.activePlayers = [false, false, false, false];
         this.playerColors = ['gold', 'red', 'blue', 'green'];
         this.playerNames = ['Jaylen', 'Samantha', 'Marcus', 'Elena'];
+        this.playerDescriptions = [
+          'Jaylen – He’s trying to do the right thing but life keeps throwing him curveballs. He might make risky choices just to survive. (Strain Theory)',
+          'Samantha – One mistake and now everyone treats her like a criminal. That kind of label sticks and it’s messing with her future. (Labeling Theory)',
+          'Marcus – All his friends are doing it, and that’s how he’s learning what’s “normal.” He’s picking up habits from the people around him. (Social Learning Theory)',
+          'Elena – She sees how unfair the system is, especially for people who look like her. She wants change but faces constant obstacles. (Conflict Theory)'
+        ];
         this.board = document.getElementById('board');
         this.positionsDisplay = document.getElementById('positions');
         this.turnDisplay = document.getElementById('turnDisplay');
@@ -250,7 +256,7 @@
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
-            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cards[i] ? ', draw card' : ''}`);
+            cell.setAttribute('aria-label', filos`Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cards[i] ? ', draw card' : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.addEventListener('click', () => this.handleCellClick(i));
@@ -398,7 +404,8 @@
             return;
           }
           this.activePlayers[playerIndex] = true;
-          alert(`${this.playerNames[playerIndex]} joined the game!`);
+          // Show alert with player name and description
+          alert(`${this.playerNames[playerIndex]} joined the game!\n\n${this.playerDescriptions[playerIndex]}`);
           this.renderPlayer();
           this.updateButtonState();
           if (this.currentPlayer === playerIndex && !this.activePlayers[this.currentPlayer]) {
@@ -485,7 +492,6 @@
             const newPos = this.playerPositions[this.currentPlayer];
             console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
             
-            // Show alert with card message and resulting position
             alert(`${cardData.text}\nYou moved to position ${newPos}!`);
 
             if (newPos !== nextPos) {
