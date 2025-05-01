@@ -87,7 +87,7 @@
       padding: 2px 4px;
       font-weight: bold;
     }
-    .trouble { background-color: #ffcccb !important; } /* Light red for trouble slots */
+    .trouble { background-color: #ffcccb !important; }
     .trouble img {
       width: 100%;
       height: 100%;
@@ -847,20 +847,13 @@
             nextPos = ladderPos;
             this.playerPositions[this.currentPlayer] = nextPos;
           }
-          else if (this.chutes[nextPos]) {
+
+          if (this.chutes[nextPos]) {
             const chuteData = this.chutes[nextPos];
             const chutePos = chuteData.to;
             this.showModal('Chute!', `${chuteData.message}\nMoving to position ${chutePos}!`);
             await this.animateToken(this.currentPlayer, nextPos, chutePos);
             nextPos = chutePos;
-            this.playerPositions[this.currentPlayer] = nextPos;
-          }
-          else if (this.troubleSlots[nextPos]) {
-            const troubleData = this.troubleSlots[nextPos];
-            const troublePos = troubleData.to;
-            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
-            await this.animateToken(this.currentPlayer, nextPos, troublePos);
-            nextPos = troublePos;
             this.playerPositions[this.currentPlayer] = nextPos;
           }
 
@@ -877,8 +870,8 @@
 
             if (newPos !== nextPos) {
               await this.animateToken(this.currentPlayer, nextPos, newPos);
-              this.playerPositions[this.currentPlayer] = newPos;
-              await this.renderPlayer();
+              nextPos = newPos;
+              this.playerPositions[this.currentPlayer] = nextPos;
             } else {
               console.log(`No position change after card effect, proceeding`);
               await new Promise(resolve => setTimeout(resolve, 300));
@@ -887,6 +880,16 @@
             this.card.style.display = 'block';
           } else {
             this.card.style.display = 'none';
+          }
+
+          // Check for trouble slots after all movements (initial move, ladder, chute, card)
+          if (this.troubleSlots[nextPos]) {
+            const troubleData = this.troubleSlots[nextPos];
+            const troublePos = troubleData.to;
+            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
+            await this.animateToken(this.currentPlayer, nextPos, troublePos);
+            nextPos = troublePos;
+            this.playerPositions[this.currentPlayer] = nextPos;
           }
 
           if (this.playerPositions[this.currentPlayer] >= 50) {
