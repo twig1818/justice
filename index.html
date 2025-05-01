@@ -138,7 +138,7 @@
       font-size: 14px;
     }
     /* Modal styles */
-    #joinModal {
+    #gameModal {
       display: none;
       position: fixed;
       top: 0;
@@ -150,7 +150,7 @@
       justify-content: center;
       align-items: center;
     }
-    #joinModalContent {
+    #gameModalContent {
       background-color: white;
       padding: 20px;
       border-radius: 8px;
@@ -159,13 +159,14 @@
       text-align: left;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
-    #joinModalContent h3 {
+    #gameModalContent h3 {
       margin: 0 0 10px 0;
       font-size: 18px;
     }
-    #joinModalContent p {
+    #gameModalContent p {
       margin: 0 0 20px 0;
       font-size: 14px;
+      white-space: pre-wrap; /* Preserve line breaks */
     }
     .modal-buttons {
       display: flex;
@@ -179,11 +180,15 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    #joinModalJoin {
+    .modal-button-ok {
+      background-color: #2196F3;
+      color: white;
+    }
+    .modal-button-join {
       background-color: #4CAF50;
       color: white;
     }
-    #joinModalCancel {
+    .modal-button-cancel {
       background-color: #f44336;
       color: white;
     }
@@ -208,13 +213,13 @@
       #playerSelection p {
         font-size: 12px;
       }
-      #joinModalContent {
+      #gameModalContent {
         padding: 15px;
       }
-      #joinModalContent h3 {
+      #gameModalContent h3 {
         font-size: 16px;
       }
-      #joinModalContent p {
+      #gameModalContent p {
         font-size: 12px;
       }
       .modal-buttons button {
@@ -278,15 +283,12 @@
   <div style="margin-top: 20px;">
     <div class="card" id="card" style="display:none;" role="alert"></div>
   </div>
-  <!-- Added modal for joining players -->
-  <div id="joinModal" role="dialog" aria-labelledby="joinModalTitle" aria-modal="true">
-    <div id="joinModalContent">
-      <h3 id="joinModalTitle"></h3>
-      <p id="joinModalDescription"></p>
-      <div class="modal-buttons">
-        <button id="joinModalCancel" aria-label="Cancel joining">Cancel</button>
-        <button id="joinModalJoin" aria-label="Confirm joining">Join</button>
-      </div>
+  <!-- Reusable modal for all alerts -->
+  <div id="gameModal" role="dialog" aria-labelledby="gameModalTitle" aria-modal="true">
+    <div id="gameModalContent">
+      <h3 id="gameModalTitle"></h3>
+      <p id="gameModalDescription"></p>
+      <div class="modal-buttons" id="gameModalButtons"></div>
     </div>
   </div>
   <script>
@@ -329,12 +331,48 @@
           48: { text: "You're blamed for something you didn’t do. Move back 3.", effect: function (game) { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         };
         // Modal elements
-        this.joinModal = document.getElementById('joinModal');
-        this.joinModalTitle = document.getElementById('joinModalTitle');
-        this.joinModalDescription = document.getElementById('joinModalDescription');
-        this.joinModalJoin = document.getElementById('joinModalJoin');
-        this.joinModalCancel = document.getElementById('joinModalCancel');
+        this.gameModal = document.getElementById('gameModal');
+        this.gameModalTitle = document.getElementById('gameModalTitle');
+        this.gameModalDescription = document.getElementById('gameModalDescription');
+        this.gameModalButtons = document.getElementById('gameModalButtons');
         this.currentJoinIndex = null; // To track which player is being joined
+
+        // Add ESC key support for closing modals
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.gameModal.style.display === 'flex') {
+            this.gameModal.style.display = 'none';
+            this.currentJoinIndex = null;
+          }
+        });
+
+        // Add overlay click to close modal
+        this.gameModal.addEventListener('click', (e) => {
+          if (e.target === this.gameModal) {
+            this.gameModal.style.display = 'none';
+            this.currentJoinIndex = null;
+          }
+        });
+      }
+
+      // Reusable modal function
+      showModal(title, message, buttons = [{ text: 'OK', class: 'modal-button-ok', onClick: () => this.gameModal.style.display = 'none' }]) {
+        this.gameModalTitle.textContent = title;
+        this.gameModalDescription.textContent = message;
+        this.gameModalButtons.innerHTML = ''; // Clear existing buttons
+
+        buttons.forEach(button => {
+          const btn = document.createElement('button');
+          btn.textContent = button.text;
+          btn.className = button.class;
+          btn.setAttribute('aria-label', button.text);
+          btn.addEventListener('click', () => {
+            button.onClick();
+          });
+          this.gameModalButtons.appendChild(btn);
+        });
+
+        this.gameModal.style.display = 'flex';
+        this.gameModalButtons.querySelector('button').focus(); // Focus the first button
       }
 
       initBoard() {
@@ -381,7 +419,7 @@
           }
         } catch (error) {
           console.error('Error in initBoard:', error.message, error.stack);
-          alert('Failed to initialize the game board. Please refresh the page.');
+          this.showModal('Error', 'Failed to initialize the game board. Please refresh the page.');
         }
       }
 
@@ -476,7 +514,7 @@
           this.positionsDisplay.textContent = positionsText ? positionsText.slice(0, -3) : 'No players';
         } catch (error) {
           console.error('Error in renderPlayer:', error.message, error.stack);
-          alert('Failed to render players. Please reset the game.');
+          this.showModal('Error', 'Failed to render players. Please reset the game.');
         }
       }
 
@@ -488,44 +526,43 @@
       joinGame(playerIndex) {
         try {
           if (this.activePlayers[playerIndex]) {
-            alert(`${this.playerNames[playerIndex]} has already joined.`);
+            this.showModal('Notice', `${this.playerNames[playerIndex]} has already joined.`);
             return;
           }
 
           // Show modal with player info
           this.currentJoinIndex = playerIndex;
-          this.joinModalTitle.textContent = `${this.playerNames[playerIndex]}'s Profile`;
-          this.joinModalDescription.textContent = this.playerDescriptions[playerIndex];
-          this.joinModal.style.display = 'flex';
-
-          // Remove any existing event listeners to avoid duplicates
-          const joinButtonClone = this.joinModalJoin.cloneNode(true);
-          this.joinModalJoin.parentNode.replaceChild(joinButtonClone, this.joinModalJoin);
-          this.joinModalJoin = joinButtonClone;
-
-          const cancelButtonClone = this.joinModalCancel.cloneNode(true);
-          this.joinModalCancel.parentNode.replaceChild(cancelButtonClone, this.joinModalCancel);
-          this.joinModalCancel = cancelButtonClone;
-
-          // Add event listeners for Join and Cancel buttons
-          this.joinModalJoin.addEventListener('click', () => {
-            this.activePlayers[playerIndex] = true;
-            this.renderPlayer();
-            this.updateButtonState();
-            if (this.currentPlayer === playerIndex && !this.activePlayers[this.currentPlayer]) {
-              this.nextTurn();
-            }
-            this.joinModal.style.display = 'none';
-            this.currentJoinIndex = null;
-          });
-
-          this.joinModalCancel.addEventListener('click', () => {
-            this.joinModal.style.display = 'none';
-            this.currentJoinIndex = null;
-          });
+          this.showModal(
+            `${this.playerNames[playerIndex]}'s Profile`,
+            this.playerDescriptions[playerIndex],
+            [
+              {
+                text: 'Cancel',
+                class: 'modal-button-cancel',
+                onClick: () => {
+                  this.gameModal.style.display = 'none';
+                  this.currentJoinIndex = null;
+                }
+              },
+              {
+                text: 'Join',
+                class: 'modal-button-join',
+                onClick: () => {
+                  this.activePlayers[playerIndex] = true;
+                  this.renderPlayer();
+                  this.updateButtonState();
+                  if (this.currentPlayer === playerIndex && !this.activePlayers[this.currentPlayer]) {
+                    this.nextTurn();
+                  }
+                  this.gameModal.style.display = 'none';
+                  this.currentJoinIndex = null;
+                }
+              }
+            ]
+          );
         } catch (error) {
           console.error('Error in joinGame:', error.message, error.stack);
-          alert('Failed to join the game. Please refresh the page.');
+          this.showModal('Error', 'Failed to join the game. Please refresh the page.');
         }
       }
 
@@ -545,7 +582,7 @@
       rollDice() {
         try {
           if (!this.activePlayers.includes(true)) {
-            alert('No players have joined the game!');
+            this.showModal('Notice', 'No players have joined the game!');
             return;
           }
           this.card.style.display = 'none';
@@ -557,18 +594,18 @@
           this.highlightTargetCell(this.targetPosition);
         } catch (error) {
           console.error('Error in rollDice:', error.message, error.stack);
-          alert('Failed to roll the dice. Please reset the game.');
+          this.showModal('Error', 'Failed to roll the dice. Please reset the game.');
         }
       }
 
       async handleCellClick(position) {
         if (this.pendingRoll === null) {
-          alert('Please roll the dice first!');
+          this.showModal('Notice', 'Please roll the dice first!');
           return;
         }
 
         if (position !== this.targetPosition) {
-          alert(`You must move to cell ${this.targetPosition}!`);
+          this.showModal('Notice', `You must move to cell ${this.targetPosition}!`);
           return;
         }
 
@@ -583,14 +620,14 @@
 
           if (this.ladders[nextPos]) {
             const ladderPos = this.ladders[nextPos];
-            alert('🟢 You climbed a ladder! Moving to position ' + ladderPos + '!');
+            this.showModal('Ladder!', `🟢 You climbed a ladder! Moving to position ${ladderPos}!`);
             await this.animateToken(this.currentPlayer, nextPos, ladderPos);
             nextPos = ladderPos;
             this.playerPositions[this.currentPlayer] = nextPos;
           }
           else if (this.chutes[nextPos]) {
             const chutePos = this.chutes[nextPos];
-            alert('🔴 You slid down a chute! Moving to position ' + chutePos + '!');
+            this.showModal('Chute!', `🔴 You slid down a chute! Moving to position ${chutePos}!`);
             await this.animateToken(this.currentPlayer, nextPos, chutePos);
             nextPos = chutePos;
             this.playerPositions[this.currentPlayer] = nextPos;
@@ -604,7 +641,7 @@
             const newPos = this.playerPositions[this.currentPlayer];
             console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
             
-            alert(`${cardData.text}\nYou moved to position ${newPos}!`);
+            this.showModal('Action Card', `${cardData.text}\nYou moved to position ${newPos}!`);
 
             if (newPos !== nextPos) {
               await this.animateToken(this.currentPlayer, nextPos, newPos);
@@ -621,13 +658,21 @@
           }
 
           if (this.playerPositions[this.currentPlayer] >= 50) {
-            alert(`${this.playerNames[this.currentPlayer]} wins!`);
+            this.showModal('Victory!', `${this.playerNames[this.currentPlayer]} wins!`);
             this.playerTokens[this.currentPlayer].remove();
             this.playerTokens[this.currentPlayer] = null;
             this.activePlayers[this.currentPlayer] = false;
             if (!this.activePlayers.includes(true)) {
-              alert('Game Over! All players have finished.');
-              this.resetGame();
+              this.showModal('Game Over', 'Game Over! All players have finished.', [
+                {
+                  text: 'OK',
+                  class: 'modal-button-ok',
+                  onClick: () => {
+                    this.gameModal.style.display = 'none';
+                    this.resetGame();
+                  }
+                }
+              ]);
               return;
             }
           }
@@ -640,7 +685,7 @@
           this.nextTurn();
         } catch (error) {
           console.error('Error in handleCellClick:', error.message, error.stack);
-          alert('An error occurred during the move. Please reset the game.');
+          this.showModal('Error', 'An error occurred during the move. Please reset the game.');
         }
       }
 
@@ -653,7 +698,7 @@
           this.updateButtonState();
         } catch (error) {
           console.error('Error in nextTurn:', error.message, error.stack);
-          alert('Failed to advance to the next turn. Please reset the game.');
+          this.showModal('Error', 'Failed to advance to the next turn. Please reset the game.');
         }
       }
 
@@ -674,7 +719,7 @@
           this.updateButtonState();
         } catch (error) {
           console.error('Error in resetGame:', error.message, error.stack);
-          alert('Failed to reset the game. Please refresh the page.');
+          this.showModal('Error', 'Failed to reset the game. Please refresh the page.');
         }
       }
     }
@@ -688,7 +733,7 @@
         game.updateButtonState();
       } catch (error) {
         console.error('Error on window.onload:', error.message, error.stack);
-        alert('Failed to initialize the game. Please refresh the page.');
+        game.showModal('Error', 'Failed to initialize the game. Please refresh the page.');
       }
     };
   </script>
