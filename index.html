@@ -675,7 +675,7 @@
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
             const troubleMessage = this.troubleSlots[i] ? `, ${this.troubleSlots[i].message}` : '';
-            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}${i === 50 ? ', finish line' : ''}`);
+            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}${i === 50 ? ', finish line flag' : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.addEventListener('click', () => this.handleCellClick(i));
@@ -686,7 +686,7 @@
               cell.innerHTML = `<img src="https://media.giphy.com/media/27njMqCBPc2SQ/giphy.gif" alt="Start Line">`;
             } else if (i === 50) {
               cell.classList.add('end');
-              cell.innerHTML = `<img src="https://media.giphy.com/media/xTiTnwv0KFLVHCx1FS/giphy.gif" alt="Finish Line">`;
+              cell.innerHTML = `<img src="https://media.giphy.com/media/kc3xO5kO2n7e8/giphy.gif" alt="Finish Line Flag">`;
             } else if (i === 17 || i === 31) {
               cell.classList.add('trouble');
               const troubleData = this.troubleSlots[i];
