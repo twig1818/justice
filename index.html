@@ -619,7 +619,7 @@
           { theory: "Conflict Theory", text: "Discrimination in education delays your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Conflict Theory", text: "Systemic barriers block your access to resources. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         ];
-        this.cardCells = [6, 8, 10, 15, 21, 23, 28, 33, 35, 37, 44, 48]; // 12 slots
+        this.cardCells = [2, 6, 8, 10, 15, 21, 23, 26, 28, 33, 35, 37, 44, 48]; // Updated to include 2 and 26
         this.currentJoinIndex = null;
         this.isProcessingMove = false;
         this.currentCardIndex = 0; // Track current card in draw deck
