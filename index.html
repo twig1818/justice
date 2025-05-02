@@ -627,30 +627,35 @@
         this.isDrawCardPending = false; // Track if a card draw is pending
         this.lastCardPosition = null; // Track the position where the card draw is pending
 
-        // Show welcome pop-up with highlight
-        const playerSelection = document.getElementById('playerSelection');
-        playerSelection.classList.add('highlight');
-        this.showModal(
-          'Welcome to My Journey to Justice!',
-          'Start your journey by picking your player to the left.',
-          [
-            {
-              text: 'OK',
-              class: 'modal-button-ok',
-              onClick: () => {
-                this.gameModal.style.display = 'none';
-                playerSelection.classList.remove('highlight');
-              }
-            }
-          ]
-        );
-
         this.initModalElements();
         this.setupEventListeners();
         this.updateRollButtonLabel();
         this.updateDrawCardStack(); // Initialize draw card stack
         this.updateBrowseCardStack(); // Initialize browse card stack
         this.initFireworks(); // Initialize fireworks canvas
+
+        // Show welcome pop-up with highlight after modal elements are initialized
+        const playerSelection = document.getElementById('playerSelection');
+        if (playerSelection) {
+          playerSelection.classList.add('highlight');
+          this.showModal(
+            'Welcome to My Journey to Justice!',
+            'Start your journey by picking a player.',
+            [
+              {
+                text: 'OK',
+                class: 'modal-button-ok',
+                onClick: () => {
+                  this.gameModal.style.display = 'none';
+                  playerSelection.classList.remove('highlight');
+                }
+              }
+            ]
+          );
+        } else {
+          console.error('Player selection element not found!');
+          document.getElementById('loading').textContent = 'Error: Player selection element not found.';
+        }
       }
 
       initModalElements() {
@@ -670,6 +675,8 @@
           if (e.key === 'Escape' && this.gameModal && this.gameModal.style.display === 'flex') {
             this.gameModal.style.display = 'none';
             this.currentJoinIndex = null;
+            const playerSelection = document.getElementById('playerSelection');
+            if (playerSelection) playerSelection.classList.remove('highlight');
           }
         });
 
@@ -678,6 +685,8 @@
             if (e.target === this.gameModal) {
               this.gameModal.style.display = 'none';
               this.currentJoinIndex = null;
+              const playerSelection = document.getElementById('playerSelection');
+              if (playerSelection) playerSelection.classList.remove('highlight');
             }
           });
         }
@@ -1138,7 +1147,7 @@
 
           if (this.playerPositions[this.currentPlayer] >= 50) {
             this.startFireworks();
-            this.showModal('Victory!', 'Congratulations! You have won the game, but your journey never ends.'); // Updated message
+            this.showModal('Victory!', 'Congratulations! You have won the game, but your journey never ends.');
             this.playerTokens[this.currentPlayer].remove();
             this.playerTokens[this.currentPlayer] = null;
             this.activePlayers[this.currentPlayer] = false;
