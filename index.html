@@ -17,7 +17,7 @@
       margin-top: 20px;
     }
     #board {
-      display: grid !important; /* Ensure grid display is not overridden */
+      display: grid !important;
       grid-template-columns: repeat(10, 90px);
       grid-template-rows: repeat(5, 90px);
       gap: 4px;
@@ -25,7 +25,7 @@
       width: max-content;
       position: relative;
       min-height: 470px;
-      visibility: visible !important; /* Ensure board is visible */
+      visibility: visible !important;
     }
     .cell {
       background-color: lightgray;
@@ -305,7 +305,7 @@
       margin-top: 10px;
     }
     #drawCardStack, #browseCardStack {
-      width: 270px; /* Matches width of cells 41–43 (3 * 90px) */
+      width: 270px;
       padding: 10px;
       background-color: #fff;
       border: 2px solid #333;
@@ -423,7 +423,7 @@
         height: 12px;
       }
       #drawCardStack, #browseCardStack {
-        width: 180px; /* Matches 3 * 60px */
+        width: 180px;
         padding: 8px;
       }
       #drawCardStack h3, #browseCardStack h3 {
@@ -584,7 +584,7 @@
           31: { to: 1, message: "🔴 Labeling Theory: You were labeled a troublemaker after spray painting, leading to more trouble! Go back to the start line." }
         };
         this.cardPool = [
-          // Strain Theory cards (7 existing + 1 new = 8 cards)
+          // Strain Theory cards (8 cards)
           { theory: "Strain Theory", text: "A mentor helps you manage stress from life's pressures. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           { theory: "Strain Theory", text: "You secure a part-time job to ease financial strain. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Strain Theory", text: "The pressure to succeed leads you to a risky decision. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
@@ -593,7 +593,7 @@
           { theory: "Strain Theory", text: "Overwhelmed by financial strain, you take a risky shortcut that fails. Move back 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 4); } },
           { theory: "Strain Theory", text: "You find a supportive community to help manage life's challenges. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Strain Theory", text: "You receive a grant to pursue your goals, easing financial strain. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
-          // Labeling Theory cards (7 existing + 1 new = 8 cards)
+          // Labeling Theory cards (8 cards)
           { theory: "Labeling Theory", text: "You prove the negative labels wrong and gain community support. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Labeling Theory", text: "A teacher sees your potential beyond the labels. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Labeling Theory", text: "Society's labels make you doubt yourself, causing a setback. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
@@ -619,22 +619,21 @@
           { theory: "Conflict Theory", text: "Discrimination in education delays your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Conflict Theory", text: "Systemic barriers block your access to resources. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         ];
-        this.cardCells = [2, 6, 8, 10, 15, 21, 23, 26, 28, 33, 35, 37, 44, 48]; // Updated to include 2 and 26
+        this.cardCells = [2, 6, 8, 10, 15, 21, 23, 26, 28, 33, 35, 37, 44, 48];
         this.currentJoinIndex = null;
         this.isProcessingMove = false;
-        this.currentCardIndex = 0; // Track current card in draw deck
-        this.browseCardIndex = 0; // Track current card in browse deck
-        this.isDrawCardPending = false; // Track if a card draw is pending
-        this.lastCardPosition = null; // Track the position where the card draw is pending
+        this.currentCardIndex = 0;
+        this.browseCardIndex = 0;
+        this.isDrawCardPending = false;
+        this.lastCardPosition = null;
 
         this.initModalElements();
         this.setupEventListeners();
         this.updateRollButtonLabel();
-        this.updateDrawCardStack(); // Initialize draw card stack
-        this.updateBrowseCardStack(); // Initialize browse card stack
-        this.initFireworks(); // Initialize fireworks canvas
+        this.updateDrawCardStack();
+        this.updateBrowseCardStack();
+        this.initFireworks();
 
-        // Show welcome pop-up with highlight after modal elements are initialized
         const playerSelection = document.getElementById('playerSelection');
         if (playerSelection) {
           playerSelection.classList.add('highlight');
@@ -725,8 +724,8 @@
             console.error('Loading element not found!');
             throw new Error('Loading element not found');
           }
-          loadingElement.style.display = 'none'; // Hide loading message
-          this.board.innerHTML = ''; // Clear any existing content
+          loadingElement.style.display = 'none';
+          this.board.innerHTML = '';
           this.cells = {};
 
           for (let i = 1; i <= 50; i++) {
@@ -736,7 +735,7 @@
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
             const troubleMessage = this.troubleSlots[i] ? `, ${this.troubleSlots[i].message}` : '';
-            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}${i === 50 ? ', finish line' : ''}`); // Updated aria-label
+            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}${i === 50 ? ', finish line' : ''}`);
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.addEventListener('click', () => this.handleCellClick(i));
@@ -749,13 +748,13 @@
               img.alt = "Start Line";
               img.onerror = () => {
                 console.error(`Failed to load start line image for cell ${i}`);
-                img.src = ''; // Fallback to empty string
+                img.src = '';
                 img.alt = "Start Line (Image Failed to Load)";
               };
               cell.appendChild(img);
             } else if (i === 50) {
               cell.classList.add('end');
-              cell.innerHTML = `<div>Finish Line</div>`; // Replace GIF with text
+              cell.innerHTML = `<div>Finish Line</div>`;
             } else if (i === 17 || i === 31) {
               cell.classList.add('trouble');
               const troubleData = this.troubleSlots[i];
@@ -1023,7 +1022,7 @@
         this.particles.forEach(p => {
           p.x += p.vx;
           p.y += p.vy;
-          p.vy += 0.02; // Gravity
+          p.vy += 0.02;
           p.alpha -= 0.01;
           p.life--;
           this.ctx.beginPath();
@@ -1191,28 +1190,39 @@
         try {
           this.isDrawCardPending = false;
           this.drawCardButton.disabled = true;
-          const nextPos = this.lastCardPosition;
+          const startPos = this.playerPositions[this.currentPlayer];
+          console.log(`Drawing card at position ${startPos} for Player ${this.currentPlayer + 1}`);
+          
           const { card: cardData, index: cardIndex } = this.drawRandomCard();
-          console.log(`Drew card at position ${nextPos}: ${cardData.text}`);
-          const prevPos = this.playerPositions[this.currentPlayer];
+          console.log(`Drew card ${cardIndex + 1}: ${cardData.theory} - ${cardData.text}`);
+          
+          // Apply card effect
           cardData.effect(this);
           const newPos = this.playerPositions[this.currentPlayer];
-          console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
+          console.log(`Card effect applied. Moved from ${startPos} to ${newPos}`);
           
-          const displayText = `You drew card ${cardIndex + 1} of ${this.cardPool.length}: ${cardData.theory}: ${cardData.text}`;
-          this.showModal('Action Card', `${displayText}\nYou moved to position ${newPos}!`);
-
-          if (newPos !== nextPos) {
-            await this.animateToken(this.currentPlayer, nextPos, newPos);
-            this.playerPositions[this.currentPlayer] = newPos;
+          // Animate token movement if position changed
+          if (newPos !== startPos) {
+            await this.animateToken(this.currentPlayer, startPos, newPos);
           } else {
-            console.log(`No position change after card effect, proceeding`);
+            console.log('No position change after card effect');
             await new Promise(resolve => setTimeout(resolve, 300));
           }
+
+          // Display card information
+          const displayText = `You drew card ${cardIndex + 1} of ${this.cardPool.length}: ${cardData.theory}: ${cardData.text}`;
           this.card.textContent = displayText;
           this.card.style.display = 'block';
+          
+          // Show modal with result
+          this.showModal('Action Card', `${displayText}\nMoved to position ${newPos}!`);
+          
+          // Update game state
+          this.lastCardPosition = null;
           this.updateDrawCardStack();
           await this.renderPlayer();
+          
+          console.log(`Card draw complete. Player ${this.currentPlayer + 1} at position ${newPos}`);
         } catch (error) {
           console.error('Error in drawCardFromDeck:', error.message, error.stack);
           this.showModal('Error', 'An error occurred while drawing a card. Please try again.');
@@ -1254,14 +1264,14 @@
           this.card.style.display = 'none';
           this.diceResult.textContent = '';
           this.turnDisplay.textContent = '🎯 Player 1\'s turn';
-          this.currentCardIndex = 0; // Reset draw card stack
-          this.browseCardIndex = 0; // Reset browse card stack
-          this.isDrawCardPending = false; // Reset card draw state
+          this.currentCardIndex = 0;
+          this.browseCardIndex = 0;
+          this.isDrawCardPending = false;
           this.lastCardPosition = null;
           this.drawCardButton.disabled = true;
           this.updateDrawCardStack();
           this.updateBrowseCardStack();
-          this.canvas.style.display = 'none'; // Hide fireworks
+          this.canvas.style.display = 'none';
           this.particles = [];
           this.updateButtonState();
           this.updateRollButtonLabel();
@@ -1331,7 +1341,6 @@
       }
     }
 
-    // Initialize the game
     function initializeGame() {
       console.log('DOM loaded, initializing game...');
       try {
@@ -1351,10 +1360,8 @@
       }
     }
 
-    // Use DOMContentLoaded with a fallback
     document.addEventListener('DOMContentLoaded', initializeGame);
 
-    // Fallback: If DOMContentLoaded doesn't fire, try after a short delay
     setTimeout(() => {
       if (document.getElementById('loading').textContent === 'Loading...') {
         console.warn('DOMContentLoaded did not fire, attempting fallback initialization...');
