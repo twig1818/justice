@@ -130,6 +130,12 @@
     }
     .start { background-color: #a8e6ff !important; }
     .end { background-color: #b9fbc0 !important; }
+    .end div {
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 1.2;
+    }
     .card {
       margin: 20px auto;
       padding: 10px;
@@ -425,6 +431,9 @@
         flex-direction: column;
         gap: 10px;
       }
+      .end div {
+        font-size: 10px;
+      }
     }
   </style>
 </head>
@@ -690,7 +699,7 @@
             cell.id = `cell-${i}`;
             cell.setAttribute('role', 'gridcell');
             const troubleMessage = this.troubleSlots[i] ? `, ${this.troubleSlots[i].message}` : '';
-            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}${i === 50 ? ', finish line flag' : ''}`);
+            cell.setAttribute('aria-label', `Cell ${i}${this.ladders[i] ? ', ladder' : ''}${this.chutes[i] ? ', chute' : ''}${this.cardCells.includes(i) ? ', draw card' : ''}${this.troubleSlots[i] ? ', trouble' + troubleMessage : ''}${i === 50 ? ', finish line' : ''}`); // Updated aria-label
             cell.tabIndex = 0;
             cell.dataset.position = i;
             cell.addEventListener('click', () => this.handleCellClick(i));
@@ -709,15 +718,7 @@
               cell.appendChild(img);
             } else if (i === 50) {
               cell.classList.add('end');
-              const img = document.createElement('img');
-              img.src = "https://media.giphy.com/media/kc3xO5kO2n7e8/giphy.gif";
-              img.alt = "Finish Line Flag";
-              img.onerror = () => {
-                console.error(`Failed to load finish line image for cell ${i}`);
-                img.src = '';
-                img.alt = "Finish Line Flag (Image Failed to Load)";
-              };
-              cell.appendChild(img);
+              cell.innerHTML = `<div>Finish Line</div>`; // Replace GIF with text
             } else if (i === 17 || i === 31) {
               cell.classList.add('trouble');
               const troubleData = this.troubleSlots[i];
@@ -1109,7 +1110,7 @@
 
           if (this.playerPositions[this.currentPlayer] >= 50) {
             this.startFireworks();
-            this.showModal('Finish Line!', 'Your journey is never over unless you make it over');
+            this.showModal('Victory!', 'Congratulations! You have won the game, but your journey never ends.'); // Updated message
             this.playerTokens[this.currentPlayer].remove();
             this.playerTokens[this.currentPlayer] = null;
             this.activePlayers[this.currentPlayer] = false;
