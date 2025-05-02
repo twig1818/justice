@@ -455,8 +455,7 @@
         <button onclick="game.joinGame(2)" style="background-color: blue; color: white;" aria-label="Join as Marcus">Join as Marcus 🔵</button>
         <div class="info-tooltip">
           <button class="info-button" aria-label="Marcus info">ℹ️</button>
-          <div class="tooltip-content">
-            Marcus – All his friends are doing it, and that’s how he’s learning what’s “normal.” He’s picking up habits from the people around him. (Social Learning Theory)
+          <divーザ: "Marcus – All his friends are doing it, and that’s how he’s learning what’s “normal.” He’s picking up habits from the people around him. (Social Learning Theory)
           </div>
         </div>
       </div>
@@ -564,7 +563,7 @@
           31: { to: 1, message: "🔴 Labeling Theory: You were labeled a troublemaker after spray painting, leading to more trouble! Go back to the start line." }
         };
         this.cardPool = [
-          // Strain Theory cards (7 cards)
+          // Strain Theory cards (7 existing + 1 new = 8 cards)
           { theory: "Strain Theory", text: "A mentor helps you manage stress from life's pressures. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           { theory: "Strain Theory", text: "You secure a part-time job to ease financial strain. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Strain Theory", text: "The pressure to succeed leads you to a risky decision. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
@@ -572,7 +571,8 @@
           { theory: "Strain Theory", text: "You overcome intense societal pressure by securing a scholarship, paving a brighter future. Move forward 6 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 6); } },
           { theory: "Strain Theory", text: "Overwhelmed by financial strain, you take a risky shortcut that fails. Move back 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 4); } },
           { theory: "Strain Theory", text: "You find a supportive community to help manage life's challenges. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
-          // Labeling Theory cards (7 cards)
+          { theory: "Strain Theory", text: "You receive a grant to pursue your goals, easing financial strain. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } }, // New card
+          // Labeling Theory cards (7 existing + 1 new = 8 cards)
           { theory: "Labeling Theory", text: "You prove the negative labels wrong and gain community support. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Labeling Theory", text: "A teacher sees your potential beyond the labels. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Labeling Theory", text: "Society's labels make you doubt yourself, causing a setback. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
@@ -580,6 +580,7 @@
           { theory: "Labeling Theory", text: "You challenge a negative label by excelling in a community project, earning widespread respect. Move forward 7 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 7); } },
           { theory: "Labeling Theory", text: "You overcome a negative label by volunteering, gaining trust. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Labeling Theory", text: "A past label resurfaces, causing distrust and a setback. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
+          { theory: "Labeling Theory", text: "A negative label leads to exclusion from a program, setting you back. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } }, // New card
           // Social Learning Theory cards (7 cards)
           { theory: "Social Learning Theory", text: "You learn a valuable skill from a positive role model. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           { theory: "Social Learning Theory", text: "A friend inspires you to make better choices. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
@@ -597,7 +598,7 @@
           { theory: "Conflict Theory", text: "Discrimination in education delays your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Conflict Theory", text: "Systemic barriers block your access to resources. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         ];
-        this.cardCells = [6, 8, 10, 15, 21, 23, 28, 33, 35, 37, 44, 48]; // Added 8 and 35
+        this.cardCells = [6, 8, 10, 15, 21, 23, 28, 33, 35, 37, 44, 48]; // 12 slots
         this.currentJoinIndex = null;
         this.isProcessingMove = false;
         this.currentCardIndex = 0; // Track current card in draw deck
@@ -771,7 +772,7 @@
         const playersAtPosition = this.playerPositions
           .map((pos, idx) => (this.activePlayers[idx] && pos === position ? idx : -1))
           .filter(idx => idx !== -1);
-        const playerCount = playersAtPosition.length;
+ம: The playerCount = playersAtPosition.length;
         if (playerCount <= 1) return 0;
 
         const indexInCell = playersAtPosition.indexOf(playerIndex);
@@ -1060,224 +1061,224 @@
               this.drawCardButton.disabled = false;
               this.updateDrawCardStack();
               this.showModal('Draw a Card', 'Please click the "Draw Card" button on the deck below to draw your card.');
-            }
-          } else {
-            this.card.style.display = 'none';
-          }
-
-          if (this.troubleSlots[nextPos]) {
-            const troubleData = this.troubleSlots[nextPos];
-            const troublePos = troubleData.to;
-            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
-            await this.animateToken(this.currentPlayer, nextPos, troublePos);
-            nextPos = troublePos;
-            this.playerPositions[this.currentPlayer] = nextPos;
-          }
-
-          if (this.playerPositions[this.currentPlayer] >= 50) {
-            this.startFireworks();
-            this.showModal('Finish Line!', 'Your journey is never over unless you make it over');
-            this.playerTokens[this.currentPlayer].remove();
-            this.playerTokens[this.currentPlayer] = null;
-            this.activePlayers[this.currentPlayer] = false;
-            if (!this.activePlayers.includes(true)) {
-              this.showModal('Game Over', 'Game Over! All players have finished.', [
-                {
-                  text: 'OK',
-                  class: 'modal-button-ok',
-                  onClick: () => {
-                    this.gameModal.style.display = 'none';
-                    this.resetGame();
-                  }
-                }
-              ]);
-              return;
-            }
-          }
-
-          await this.renderPlayer();
-          this.pendingRoll = null;
-          this.targetPosition = null;
-          this.hideDice();
-          this.clearHighlights();
-          this.diceResult.textContent = `🎲 Rolled: --`;
-          console.log('After move, reset Pending Roll and Target Position');
-          this.nextTurn();
-        } catch (error) {
-          console.error('Error in handleCellClick:', error.message, error.stack);
-          this.showModal('Error', 'An error occurred during the move. Please reset the game.');
-        } finally {
-          this.isProcessingMove = false;
         }
+      } else {
+        this.card.style.display = 'none';
       }
 
-      async drawCardFromDeck() {
-        if (!this.isDrawCardPending) {
-          this.showModal('Notice', 'You can only draw a card after landing on a Draw Card square.');
+      if (this.troubleSlots[nextPos]) {
+        const troubleData = this.troubleSlots[nextPos];
+        const troublePos = troubleData.to;
+        this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
+        await this.animateToken(this.currentPlayer, nextPos, troublePos);
+        nextPos = troublePos;
+        this.playerPositions[this.currentPlayer] = nextPos;
+      }
+
+      if (this.playerPositions[this.currentPlayer] >= 50) {
+        this.startFireworks();
+        this.showModal('Finish Line!', 'Your journey is never over unless you make it over');
+        this.playerTokens[this.currentPlayer].remove();
+        this.playerTokens[this.currentPlayer] = null;
+        this.activePlayers[this.currentPlayer] = false;
+        if (!this.activePlayers.includes(true)) {
+          this.showModal('Game Over', 'Game Over! All players have finished.', [
+            {
+              text: 'OK',
+              class: 'modal-button-ok',
+              onClick: () => {
+                this.gameModal.style.display = 'none';
+                this.resetGame();
+              }
+            }
+          ]);
           return;
         }
-
-        try {
-          this.isDrawCardPending = false;
-          this.drawCardButton.disabled = true;
-          const nextPos = this.lastCardPosition;
-          const { card: cardData, index: cardIndex } = this.drawRandomCard();
-          console.log(`Drew card at position ${nextPos}: ${cardData.text}`);
-          const prevPos = this.playerPositions[this.currentPlayer];
-          cardData.effect(this);
-          const newPos = this.playerPositions[this.currentPlayer];
-          console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
-          
-          const displayText = `You drew card ${cardIndex + 1} of ${this.cardPool.length}: ${cardData.theory}: ${cardData.text}`;
-          this.showModal('Action Card', `${displayText}\nYou moved to position ${newPos}!`);
-
-          if (newPos !== nextPos) {
-            await this.animateToken(this.currentPlayer, nextPos, newPos);
-            this.playerPositions[this.currentPlayer] = newPos;
-          } else {
-            console.log(`No position change after card effect, proceeding`);
-            await new Promise(resolve => setTimeout(resolve, 300));
-          }
-          this.card.textContent = displayText;
-          this.card.style.display = 'block';
-          this.updateDrawCardStack();
-          await this.renderPlayer();
-        } catch (error) {
-          console.error('Error in drawCardFromDeck:', error.message, error.stack);
-          this.showModal('Error', 'An error occurred while drawing a card. Please try again.');
-        }
       }
 
-      nextTurn() {
-        try {
-          if (!this.activePlayers.includes(true)) {
-            this.showModal('Game Over', 'No active players remaining.');
-            return;
-          }
-          let previousPlayer = this.currentPlayer;
-          do {
-            this.currentPlayer = (this.currentPlayer + 1) % 4;
-          } while (!this.activePlayers[this.currentPlayer] && this.activePlayers.includes(true));
-          this.turnDisplay.textContent = `🎯 ${this.playerNames[this.currentPlayer]}'s turn (Player ${this.currentPlayer + 1})`;
-          this.updateButtonState();
-          this.updateRollButtonLabel();
-          console.log(`Turn switched from Player ${previousPlayer + 1} (${this.playerNames[previousPlayer]}) to Player ${this.currentPlayer + 1} (${this.playerNames[this.currentPlayer]})`);
-        } catch (error) {
-          console.error('Error in nextTurn:', error.message, error.stack);
-          this.showModal('Error', 'Failed to advance to the next turn. Please reset the game.');
-        }
-      }
+      await this.renderPlayer();
+      this.pendingRoll = null;
+      this.targetPosition = null;
+      this.hideDice();
+      this.clearHighlights();
+      this.diceResult.textContent = `🎲 Rolled: --`;
+      console.log('After move, reset Pending Roll and Target Position');
+      this.nextTurn();
+    } catch (error) {
+      console.error('Error in handleCellClick:', error.message, error.stack);
+      this.showModal('Error', 'An error occurred during the move. Please reset the game.');
+    } finally {
+      this.isProcessingMove = false;
+    }
+  }
 
-      resetGame() {
-        try {
-          this.playerPositions = [1, 1, 1, 1];
-          this.currentPlayer = 0;
-          this.pendingRoll = null;
-          this.targetPosition = null;
-          this.activePlayers = [false, false, false, false];
-          this.playerTokens.forEach(token => token?.remove());
-          this.playerTokens = [null, null, null, null];
-          this.clearHighlights();
-          this.hideDice();
-          this.renderPlayer();
-          this.card.style.display = 'none';
-          this.diceResult.textContent = '';
-          this.turnDisplay.textContent = '🎯 Player 1\'s turn';
-          this.currentCardIndex = 0; // Reset draw card stack
-          this.browseCardIndex = 0; // Reset browse card stack
-          this.isDrawCardPending = false; // Reset card draw state
-          this.lastCardPosition = null;
-          this.drawCardButton.disabled = true;
-          this.updateDrawCardStack();
-          this.updateBrowseCardStack();
-          this.canvas.style.display = 'none'; // Hide fireworks
-          this.particles = [];
-          this.updateButtonState();
-          this.updateRollButtonLabel();
-          console.log('Game reset: Pending Roll, Target Position, Card Stack, and Fireworks cleared');
-        } catch (error) {
-          console.error('Error in resetGame:', error.message, error.stack);
-          this.showModal('Error', 'Failed to reset the game. Please refresh the page.');
-        }
-      }
-
-      updateDrawCardStack() {
-        try {
-          const cardTheory = document.getElementById('cardTheory');
-          const cardText = document.getElementById('cardText');
-          if (!cardTheory || !cardText) {
-            console.error('Draw card stack elements not found!');
-            return;
-          }
-          if (this.isDrawCardPending) {
-            const card = this.cardPool[this.currentCardIndex];
-            cardTheory.textContent = card.theory;
-            cardText.textContent = card.text;
-            document.getElementById('drawCardStack').setAttribute('aria-label', `Draw card stack, showing card ${this.currentCardIndex + 1} of ${this.cardPool.length}: ${card.theory}, ${card.text}`);
-          } else {
-            cardTheory.textContent = 'Draw Deck';
-            cardText.textContent = 'Click "Draw Card" when prompted to draw a card.';
-            document.getElementById('drawCardStack').setAttribute('aria-label', 'Draw card stack, showing cover card. Click Draw Card when prompted.');
-          }
-        } catch (error) {
-          console.error('Error in updateDrawCardStack:', error.message, error.stack);
-        }
-      }
-
-      updateBrowseCardStack() {
-        try {
-          const browseCardTheory = document.getElementById('browseCardTheory');
-          const browseCardText = document.getElementById('browseCardText');
-          if (!browseCardTheory || !browseCardText) {
-            console.error('Browse card stack elements not found!');
-            return;
-          }
-          const card = this.cardPool[this.browseCardIndex];
-          browseCardTheory.textContent = `Card ${this.browseCardIndex + 1} of ${this.cardPool.length}: ${card.theory}`;
-          browseCardText.textContent = card.text;
-          document.getElementById('browseCardStack').setAttribute('aria-label', `Browse card stack, showing card ${this.browseCardIndex + 1} of ${this.cardPool.length}: ${card.theory}, ${card.text}`);
-        } catch (error) {
-          console.error('Error in updateBrowseCardStack:', error.message, error.stack);
-        }
-      }
-
-      prevBrowseCard() {
-        try {
-          this.browseCardIndex = (this.browseCardIndex - 1 + this.cardPool.length) % this.cardPool.length;
-          this.updateBrowseCardStack();
-        } catch (error) {
-          console.error('Error in prevBrowseCard:', error.message, error.stack);
-        }
-      }
-
-      nextBrowseCard() {
-        try {
-          this.browseCardIndex = (this.browseCardIndex + 1) % this.cardPool.length;
-          this.updateBrowseCardStack();
-        } catch (error) {
-          console.error('Error in nextBrowseCard:', error.message, error.stack);
-        }
-      }
+  async drawCardFromDeck() {
+    if (!this.isDrawCardPending) {
+      this.showModal('Notice', 'You can only draw a card after landing on a Draw Card square.');
+      return;
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      console.log('DOM loaded, initializing game...');
-      try {
-        const game = new Game();
-        if (game.board) {
-          game.initBoard();
-          window.game = game;
-          game.renderPlayer();
-          game.updateButtonState();
-        } else {
-          console.error('Game initialization failed: board element missing');
-          document.getElementById('loading').textContent = 'Error: Board element missing.';
-        }
-      } catch (error) {
-        console.error('Error during initialization:', error.message, error.stack);
-        document.getElementById('loading').textContent = 'Error loading game. Please refresh.';
+    try {
+      this.isDrawCardPending = false;
+      this.drawCardButton.disabled = true;
+      const nextPos = this.lastCardPosition;
+      const { card: cardData, index: cardIndex } = this.drawRandomCard();
+      console.log(`Drew card at position ${nextPos}: ${cardData.text}`);
+      const prevPos = this.playerPositions[this.currentPlayer];
+      cardData.effect(this);
+      const newPos = this.playerPositions[this.currentPlayer];
+      console.log(`After card effect, Player ${this.currentPlayer + 1} moved from ${nextPos} to ${newPos}`);
+      
+      const displayText = `You drew card ${cardIndex + 1} of ${this.cardPool.length}: ${cardData.theory}: ${cardData.text}`;
+      this.showModal('Action Card', `${displayText}\nYou moved to position ${newPos}!`);
+
+      if (newPos !== nextPos) {
+        await this.animateToken(this.currentPlayer, nextPos, newPos);
+        this.playerPositions[this.currentPlayer] = newPos;
+      } else {
+        console.log(`No position change after card effect, proceeding`);
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
-    });
+      this.card.textContent = displayText;
+      this.card.style.display = 'block';
+      this.updateDrawCardStack();
+      await this.renderPlayer();
+    } catch (error) {
+      console.error('Error in drawCardFromDeck:', error.message, error.stack);
+      this.showModal('Error', 'An error occurred while drawing a card. Please try again.');
+    }
+  }
+
+  nextTurn() {
+    try {
+      if (!this.activePlayers.includes(true)) {
+        this.showModal('Game Over', 'No active players remaining.');
+        return;
+      }
+      let previousPlayer = this.currentPlayer;
+      do {
+        this.currentPlayer = (this.currentPlayer + 1) % 4;
+      } while (!this.activePlayers[this.currentPlayer] && this.activePlayers.includes(true));
+      this.turnDisplay.textContent = `🎯 ${this.playerNames[this.currentPlayer]}'s turn (Player ${this.currentPlayer + 1})`;
+      this.updateButtonState();
+      this.updateRollButtonLabel();
+      console.log(`Turn switched from Player ${previousPlayer + 1} (${this.playerNames[previousPlayer]}) to Player ${this.currentPlayer + 1} (${this.playerNames[this.currentPlayer]})`);
+    } catch (error) {
+      console.error('Error in nextTurn:', error.message, error.stack);
+      this.showModal('Error', 'Failed to advance to the next turn. Please reset the game.');
+    }
+  }
+
+  resetGame() {
+    try {
+      this.playerPositions = [1, 1, 1, 1];
+      this.currentPlayer = 0;
+      this.pendingRoll = null;
+      this.targetPosition = null;
+      this.activePlayers = [false, false, false, false];
+      this.playerTokens.forEach(token => token?.remove());
+      this.playerTokens = [null, null, null, null];
+      this.clearHighlights();
+      this.hideDice();
+      this.renderPlayer();
+      this.card.style.display = 'none';
+      this.diceResult.textContent = '';
+      this.turnDisplay.textContent = '🎯 Player 1\'s turn';
+      this.currentCardIndex = 0; // Reset draw card stack
+      this.browseCardIndex = 0; // Reset browse card stack
+      this.isDrawCardPending = false; // Reset card draw state
+      this.lastCardPosition = null;
+      this.drawCardButton.disabled = true;
+      this.updateDrawCardStack();
+      this.updateBrowseCardStack();
+      this.canvas.style.display = 'none'; // Hide fireworks
+      this.particles = [];
+      this.updateButtonState();
+      this.updateRollButtonLabel();
+      console.log('Game reset: Pending Roll, Target Position, Card Stack, and Fireworks cleared');
+    } catch (error) {
+      console.error('Error in resetGame:', error.message, error.stack);
+      this.showModal('Error', 'Failed to reset the game. Please refresh the page.');
+    }
+  }
+
+  updateDrawCardStack() {
+    try {
+      const cardTheory = document.getElementById('cardTheory');
+      const cardText = document.getElementById('cardText');
+      if (!cardTheory || !cardText) {
+        console.error('Draw card stack elements not found!');
+        return;
+      }
+      if (this.isDrawCardPending) {
+        const card = this.cardPool[this.currentCardIndex];
+        cardTheory.textContent = card.theory;
+        cardText.textContent = card.text;
+        document.getElementById('drawCardStack').setAttribute('aria-label', `Draw card stack, showing card ${this.currentCardIndex + 1} of ${this.cardPool.length}: ${card.theory}, ${card.text}`);
+      } else {
+        cardTheory.textContent = 'Draw Deck';
+        cardText.textContent = 'Click "Draw Card" when prompted to draw a card.';
+        document.getElementById('drawCardStack').setAttribute('aria-label', 'Draw card stack, showing cover card. Click Draw Card when prompted.');
+      }
+    } catch (error) {
+      console.error('Error in updateDrawCardStack:', error.message, error.stack);
+    }
+  }
+
+  updateBrowseCardStack() {
+    try {
+      const browseCardTheory = document.getElementById('browseCardTheory');
+      const browseCardText = document.getElementById('browseCardText');
+      if (!browseCardTheory || !browseCardText) {
+        console.error('Browse card stack elements not found!');
+        return;
+      }
+      const card = this.cardPool[this.browseCardIndex];
+      browseCardTheory.textContent = `Card ${this.browseCardIndex + 1} of ${this.cardPool.length}: ${card.theory}`;
+      browseCardText.textContent = card.text;
+      document.getElementById('browseCardStack').setAttribute('aria-label', `Browse card stack, showing card ${this.browseCardIndex + 1} of ${this.cardPool.length}: ${card.theory}, ${card.text}`);
+    } catch (error) {
+      console.error('Error in updateBrowseCardStack:', error.message, error.stack);
+    }
+  }
+
+  prevBrowseCard() {
+    try {
+      this.browseCardIndex = (this.browseCardIndex - 1 + this.cardPool.length) % this.cardPool.length;
+      this.updateBrowseCardStack();
+    } catch (error) {
+      console.error('Error in prevBrowseCard:', error.message, error.stack);
+    }
+  }
+
+  nextBrowseCard() {
+    try {
+      this.browseCardIndex = (this.browseCardIndex + 1) % this.cardPool.length;
+      this.updateBrowseCardStack();
+    } catch (error) {
+      console.error('Error in nextBrowseCard:', error.message, error.stack);
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  console.log('DOM loaded, initializing game...');
+  try {
+    const game = new Game();
+    if (game.board) {
+      game.initBoard();
+      window.game = game;
+      game.renderPlayer();
+      game.updateButtonState();
+    } else {
+      console.error('Game initialization failed: board element missing');
+      document.getElementById('loading').textContent = 'Error: Board element missing.';
+    }
+  } catch (error) {
+    console.error('Error during initialization:', error.message, error.stack);
+    document.getElementById('loading').textContent = 'Error loading game. Please refresh.';
+  }
+});
   </script>
 </body>
 </html>
