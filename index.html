@@ -747,7 +747,7 @@
               img.src = "https://media.giphy.com/media/27njMqCBPc2SQ/giphy.gif";
               img.alt = "Start Line";
               img.onerror = () => {
-                console.error(`Failed to load stop line image for cell ${i}`);
+                console.error(`Failed to load start line image for cell ${i}`);
                 img.src = '';
                 img.alt = "Start Line (Image Failed to Load)";
               };
@@ -852,10 +852,17 @@
       animateToken(playerIndex, fromPos, toPos) {
         return new Promise(resolve => {
           const token = this.playerTokens[playerIndex];
-          if (!token || fromPos === toPos) {
+          if (!token) {
+            console.error(`No token found for Player ${playerIndex + 1} (${this.playerNames[playerIndex]})`);
             resolve();
             return;
           }
+          if (fromPos === toPos) {
+            console.log(`No movement needed for Player ${playerIndex + 1} (${this.playerNames[playerIndex]}) at position ${fromPos}`);
+            resolve();
+            return;
+          }
+          console.log(`Animating Player ${playerIndex + 1} (${this.playerNames[playerIndex]}) from ${fromPos} to ${toPos}`);
           this.cells[toPos].appendChild(token);
           const offset = this.getTokenOffset(playerIndex, toPos);
           token.style.transform = `translate(-50%, -50%) translateX(${offset}px)`;
@@ -1095,32 +1102,35 @@
 
         this.isProcessingMove = true;
         try {
-          console.log(`Player ${this.currentPlayer + 1} (${this.playerNames[this.currentPlayer]}) clicked cell ${position}`);
+          const actingPlayer = this.currentPlayer;
+          const actingPlayerName = this.playerNames[actingPlayer];
+          console.log(`Player ${actingPlayer + 1} (${actingPlayerName}) clicked cell ${position}`);
           
-          const currentPos = this.playerPositions[this.currentPlayer];
+          const currentPos = this.playerPositions[actingPlayer];
           let nextPos = position;
 
-          await this.animateToken(this.currentPlayer, currentPos, nextPos);
-          this.playerPositions[this.currentPlayer] = nextPos;
+          await this.animateToken(actingPlayer, currentPos, nextPos);
+          this.playerPositions[actingPlayer] = nextPos;
 
           if (this.ladders[nextPos]) {
             const ladderData = this.ladders[nextPos];
             const ladderPos = ladderData.to;
-            this.showModal('Ladder!', `${ladderData.message}\nMoving to position ${ladderPos}!`);
-            await this.animateToken(this.currentPlayer, nextPos, ladderPos);
+            this.showModal('Ladder!', `${ladderData.message}\n${actingPlayerName} moving to position ${ladderPos}!`);
+            await this.animateToken(actingPlayer, nextPos, ladderPos);
             nextPos = ladderPos;
-            this.playerPositions[this.currentPlayer] = nextPos;
+            this.playerPositions[actingPlayer] = nextPos;
           }
 
           if (this.chutes[nextPos]) {
             const chuteData = this.chutes[nextPos];
             const chutePos = chuteData.to;
-            this.showModal('Chute!', `${chuteData.message}\nMoving to position ${chutePos}!`);
-            await this.animateToken(this.currentPlayer, nextPos, chutePos);
+            this.showModal('Chute!', `${chuteData.message}\n${actingPlayerName} moving to position ${chutePos}!`);
+            await this.animateToken(actingPlayer, nextPos, chutePos);
             nextPos = chutePos;
-            this.playerPositions[this.currentPlayer] = nextPos;
+            this.playerPositions[actingPlayer] = nextPos;
           }
 
+          let shouldAdvanceTurn = true;
           if (this.cardCells.includes(nextPos)) {
             if (this.isDrawCardPending) {
               this.showModal('Draw a Card', 'You already have a pending card draw. Please click the "Draw Card" button on the deck below to draw your card.');
@@ -1129,7 +1139,8 @@
               this.lastCardPosition = nextPos;
               this.drawCardButton.disabled = false;
               this.updateDrawCardStack();
-              this.showModal('Draw a Card', 'Please click the "Draw Card" button on the deck below to draw your card.');
+              this.showModal('Draw a Card', `Please click the "Draw Card" button on the deck below to draw ${actingPlayerName}'s card.`);
+              shouldAdvanceTurn = false; // Delay turn advancement until card is drawn
             }
           } else {
             this.card.style.display = 'none';
@@ -1138,18 +1149,18 @@
           if (this.troubleSlots[nextPos]) {
             const troubleData = this.troubleSlots[nextPos];
             const troublePos = troubleData.to;
-            this.showModal('Trouble!', `${troubleData.message}\nMoving to position ${troublePos}!`);
-            await this.animateToken(this.currentPlayer, nextPos, troublePos);
+            this.showModal('Trouble!', `${troubleData.message}\n${actingPlayerName} moving to position ${troublePos}!`);
+            await this.animateToken(actingPlayer, nextPos, troublePos);
             nextPos = troublePos;
-            this.playerPositions[this.currentPlayer] = nextPos;
+            this.playerPositions[actingPlayer] = nextPos;
           }
 
-          if (this.playerPositions[this.currentPlayer] >= 50) {
+          if (this.playerPositions[actingPlayer] >= 50) {
             this.startFireworks();
-            this.showModal('Victory!', 'Congratulations! You have won the game, but your journey never ends.');
-            this.playerTokens[this.currentPlayer].remove();
-            this.playerTokens[this.currentPlayer] = null;
-            this.activePlayers[this.currentPlayer] = false;
+            this.showModal('Victory!', `Congratulations! ${actingPlayerName} has won the game, but your journey never ends.`);
+            this.playerTokens[actingPlayer].remove();
+            this.playerTokens[actingPlayer] = null;
+            this.activePlayers[actingPlayer] = false;
             if (!this.activePlayers.includes(true)) {
               this.showModal('Game Over', 'Game Over! All players have finished.', [
                 {
@@ -1172,7 +1183,10 @@
           this.clearHighlights();
           this.diceResult.textContent = `🎲 Rolled: --`;
           console.log('After move, reset Pending Roll and Target Position');
-          this.nextTurn();
+
+          if (shouldAdvanceTurn) {
+            this.nextTurn();
+          }
         } catch (error) {
           console.error('Error in handleCellClick:', error.message, error.stack);
           this.showModal('Error', 'An error occurred during the move. Please reset the game.');
@@ -1188,7 +1202,7 @@
         }
 
         try {
-          // Lock the current player to prevent turn changes
+          // Lock the current player
           const actingPlayer = this.currentPlayer;
           const actingPlayerName = this.playerNames[actingPlayer];
           this.isDrawCardPending = false;
@@ -1199,11 +1213,11 @@
           const { card: cardData, index: cardIndex } = this.drawRandomCard();
           console.log(`Drew card ${cardIndex + 1}: ${cardData.theory} - ${cardData.text}`);
 
-          // Apply card effect, ensuring only the acting player's position is updated
+          // Apply card effect
           const previousPositions = [...this.playerPositions];
           cardData.effect(this);
           const newPos = this.playerPositions[actingPlayer];
-          
+
           // Validate that only the acting player's position changed
           for (let i = 0; i < this.playerPositions.length; i++) {
             if (i !== actingPlayer && this.playerPositions[i] !== previousPositions[i]) {
@@ -1236,6 +1250,9 @@
           await this.renderPlayer();
 
           console.log(`Card draw complete for Player ${actingPlayer + 1} (${actingPlayerName}) at position ${newPos}`);
+
+          // Advance turn after card draw
+          this.nextTurn();
         } catch (error) {
           console.error('Error in drawCardFromDeck:', error.message, error.stack);
           this.showModal('Error', 'An error occurred while drawing a card. Please try again.');
