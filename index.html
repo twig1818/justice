@@ -564,40 +564,40 @@
           31: { to: 1, message: "🔴 Labeling Theory: You were labeled a troublemaker after spray painting, leading to more trouble! Go back to the start line." }
         };
         this.cardPool = [
-          // Strain Theory cards (6 existing + 1 new)
+          // Strain Theory cards (7 cards)
           { theory: "Strain Theory", text: "A mentor helps you manage stress from life's pressures. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           { theory: "Strain Theory", text: "You secure a part-time job to ease financial strain. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Strain Theory", text: "The pressure to succeed leads you to a risky decision. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
           { theory: "Strain Theory", text: "Financial strain causes you to miss an opportunity. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Strain Theory", text: "You overcome intense societal pressure by securing a scholarship, paving a brighter future. Move forward 6 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 6); } },
           { theory: "Strain Theory", text: "Overwhelmed by financial strain, you take a risky shortcut that fails. Move back 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 4); } },
-          { theory: "Strain Theory", text: "You find a supportive community to help manage life's challenges. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } }, // New card
-          // Labeling Theory cards (5 existing + 2 new)
+          { theory: "Strain Theory", text: "You find a supportive community to help manage life's challenges. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
+          // Labeling Theory cards (7 cards)
           { theory: "Labeling Theory", text: "You prove the negative labels wrong and gain community support. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Labeling Theory", text: "A teacher sees your potential beyond the labels. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Labeling Theory", text: "Society's labels make you doubt yourself, causing a setback. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Labeling Theory", text: "A false label leads to unfair treatment. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
           { theory: "Labeling Theory", text: "You challenge a negative label by excelling in a community project, earning widespread respect. Move forward 7 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 7); } },
-          { theory: "Labeling Theory", text: "You overcome a negative label by volunteering, gaining trust. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } }, // New card
-          { theory: "Labeling Theory", text: "A past label resurfaces, causing distrust and a setback. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }, // New card
-          // Social Learning Theory cards (6 existing + 1 new)
+          { theory: "Labeling Theory", text: "You overcome a negative label by volunteering, gaining trust. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
+          { theory: "Labeling Theory", text: "A past label resurfaces, causing distrust and a setback. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
+          // Social Learning Theory cards (7 cards)
           { theory: "Social Learning Theory", text: "You learn a valuable skill from a positive role model. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           { theory: "Social Learning Theory", text: "A friend inspires you to make better choices. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Social Learning Theory", text: "You pick up a bad habit from peers. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
           { theory: "Social Learning Theory", text: "Negative influences lead you astray. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Social Learning Theory", text: "A mentor teaches you innovative problem-solving skills, boosting your progress. Move forward 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 3); } },
           { theory: "Social Learning Theory", text: "You adopt effective study habits from a peer group, advancing your goals. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
-          { theory: "Social Learning Theory", text: "You join a positive peer group that motivates you to excel. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } }, // New card
-          // Conflict Theory cards (5 existing + 2 new)
+          { theory: "Social Learning Theory", text: "You join a positive peer group that motivates you to excel. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
+          // Conflict Theory cards (7 cards)
           { theory: "Conflict Theory", text: "You organize a protest and gain allies against an unfair system. Move forward 4 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 4); } },
           { theory: "Conflict Theory", text: "A community leader helps you navigate systemic barriers. Move forward 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.min(50, game.playerPositions[game.currentPlayer] + 2); } },
           { theory: "Conflict Theory", text: "Systemic inequality blocks your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
           { theory: "Conflict Theory", text: "Unfair treatment by authorities sets you back. Move back 2 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 2); } },
           { theory: "Conflict Theory", text: "Systemic biases in hiring practices limit your job prospects, hindering your path. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
-          { theory: "Conflict Theory", text: "Discrimination in education delays your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }, // New card
-          { theory: "Conflict Theory", text: "Systemic barriers block your access to resources. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } } // New card
+          { theory: "Conflict Theory", text: "Discrimination in education delays your progress. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } },
+          { theory: "Conflict Theory", text: "Systemic barriers block your access to resources. Move back 3 spaces.", effect: (game) => { game.playerPositions[game.currentPlayer] = Math.max(1, game.playerPositions[game.currentPlayer] - 3); } }
         ];
-        this.cardCells = [6, 10, 15, 21, 23, 28, 33, 37, 43, 48]; // Added 21 and 43
+        this.cardCells = [6, 10, 15, 21, 23, 28, 33, 37, 44, 48]; // Removed 43, added 44
         this.currentJoinIndex = null;
         this.isProcessingMove = false;
         this.currentCardIndex = 0; // Track current card in draw deck
