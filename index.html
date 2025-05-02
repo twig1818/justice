@@ -747,7 +747,7 @@
               img.src = "https://media.giphy.com/media/27njMqCBPc2SQ/giphy.gif";
               img.alt = "Start Line";
               img.onerror = () => {
-                console.error(`Failed to load start line image for cell ${i}`);
+                console.error(`Failed to load stop line image for cell ${i}`);
                 img.src = '';
                 img.alt = "Start Line (Image Failed to Load)";
               };
@@ -1095,7 +1095,7 @@
 
         this.isProcessingMove = true;
         try {
-          console.log(`Player ${this.currentPlayer + 1} clicked cell ${position}`);
+          console.log(`Player ${this.currentPlayer + 1} (${this.playerNames[this.currentPlayer]}) clicked cell ${position}`);
           
           const currentPos = this.playerPositions[this.currentPlayer];
           let nextPos = position;
@@ -1188,41 +1188,54 @@
         }
 
         try {
+          // Lock the current player to prevent turn changes
+          const actingPlayer = this.currentPlayer;
+          const actingPlayerName = this.playerNames[actingPlayer];
           this.isDrawCardPending = false;
           this.drawCardButton.disabled = true;
-          const startPos = this.playerPositions[this.currentPlayer];
-          console.log(`Drawing card at position ${startPos} for Player ${this.currentPlayer + 1}`);
-          
+          const startPos = this.playerPositions[actingPlayer];
+          console.log(`Drawing card for Player ${actingPlayer + 1} (${actingPlayerName}) at position ${startPos}`);
+
           const { card: cardData, index: cardIndex } = this.drawRandomCard();
           console.log(`Drew card ${cardIndex + 1}: ${cardData.theory} - ${cardData.text}`);
-          
-          // Apply card effect
+
+          // Apply card effect, ensuring only the acting player's position is updated
+          const previousPositions = [...this.playerPositions];
           cardData.effect(this);
-          const newPos = this.playerPositions[this.currentPlayer];
-          console.log(`Card effect applied. Moved from ${startPos} to ${newPos}`);
+          const newPos = this.playerPositions[actingPlayer];
           
+          // Validate that only the acting player's position changed
+          for (let i = 0; i < this.playerPositions.length; i++) {
+            if (i !== actingPlayer && this.playerPositions[i] !== previousPositions[i]) {
+              console.error(`Unexpected position change for Player ${i + 1} (${this.playerNames[i]}): ${previousPositions[i]} to ${this.playerPositions[i]}`);
+              this.playerPositions[i] = previousPositions[i]; // Revert unintended change
+            }
+          }
+
+          console.log(`Card effect applied for Player ${actingPlayer + 1} (${actingPlayerName}). Moved from ${startPos} to ${newPos}`);
+
           // Animate token movement if position changed
           if (newPos !== startPos) {
-            await this.animateToken(this.currentPlayer, startPos, newPos);
+            await this.animateToken(actingPlayer, startPos, newPos);
           } else {
-            console.log('No position change after card effect');
+            console.log(`No position change for Player ${actingPlayer + 1} (${actingPlayerName})`);
             await new Promise(resolve => setTimeout(resolve, 300));
           }
 
           // Display card information
-          const displayText = `You drew card ${cardIndex + 1} of ${this.cardPool.length}: ${cardData.theory}: ${cardData.text}`;
+          const displayText = `Player ${actingPlayer + 1} (${actingPlayerName}) drew card ${cardIndex + 1} of ${this.cardPool.length}: ${cardData.theory}: ${cardData.text}`;
           this.card.textContent = displayText;
           this.card.style.display = 'block';
-          
+
           // Show modal with result
-          this.showModal('Action Card', `${displayText}\nMoved to position ${newPos}!`);
-          
-          // Update game state
+          this.showModal('Action Card', `${displayText}\n${actingPlayerName} moved to position ${newPos}!`);
+
+          // Reset state
           this.lastCardPosition = null;
           this.updateDrawCardStack();
           await this.renderPlayer();
-          
-          console.log(`Card draw complete. Player ${this.currentPlayer + 1} at position ${newPos}`);
+
+          console.log(`Card draw complete for Player ${actingPlayer + 1} (${actingPlayerName}) at position ${newPos}`);
         } catch (error) {
           console.error('Error in drawCardFromDeck:', error.message, error.stack);
           this.showModal('Error', 'An error occurred while drawing a card. Please try again.');
